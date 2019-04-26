@@ -15,13 +15,13 @@ namespace handymanworkappapi
         {
             //validate the user if it exist in database -- call a method of employee controller with username and password
             EmployeeController user = new EmployeeController();
-            _Employee emp = new _Employee {
+            Employee emp = new Employee {
                 Email = context.UserName,
                 Password = context.Password
             };
-            bool validateduser = user.ValidateUser(emp);
+            object validateduser = user.ListFiltered("Email='" + emp.Email + "' AND Password='" + emp.Password + "'").data;
 
-            if (validateduser) {
+            if (validateduser != null) {
                 var identity = new ClaimsIdentity(context.Options.AuthenticationType);
                 identity.AddClaim(new Claim("Email", context.UserName));
                 identity.AddClaim(new Claim("Password", context.Password));

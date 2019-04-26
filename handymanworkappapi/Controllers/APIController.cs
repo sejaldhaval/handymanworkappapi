@@ -568,8 +568,304 @@ namespace handymanworkappapi.Controllers
             return item;
         }
     }
+    public class Crud
+    {
+        public ResultResponse ListAll(object item)
+        {
+            ResultResponse result = new ResultResponse
+            {
+                errorStatus = false,
+                errorMessage = "",
+                data = null
+            };
+            try
+            {
+                ADOHelper dbHelp = new ADOHelper();
 
-    public class _Employee
+                Type objectType = item.GetType();
+                ConstructorInfo objectConstructor = objectType.GetConstructor(Type.EmptyTypes);
+                object magicClassObject = objectConstructor.Invoke(new object[] { });
+                MethodInfo colmunsmethod = objectType.GetMethod("columns");
+                string columns = (string)colmunsmethod.Invoke(magicClassObject, new object[] { });
+
+                MethodInfo readerFieldsmethod = objectType.GetMethod("readerFields");
+                string[] readerFields = (string[])readerFieldsmethod.Invoke(magicClassObject, new object[] { });
+
+                MethodInfo lookupFieldsmethod = objectType.GetMethod("lookupFields");
+                string[] lookupFields = (string[])lookupFieldsmethod.Invoke(magicClassObject, new object[] { });
+
+                string SQLQuery = "SELECT " + columns + " FROM " + objectType.Name.ToString();
+
+                using (DbConnection conn = dbHelp.getDataConnection())
+                {
+                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
+                    {
+                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
+                        {
+                            List<object> self = new List<object>();
+                            while (reader.Read())
+                            {
+                                magicClassObject = dbHelp.ReaderLoop(magicClassObject, reader, readerFields);
+                                magicClassObject = dbHelp.LookupLoop(magicClassObject, lookupFields);
+                                self.Add(magicClassObject);
+                            }
+                            result.data = self;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errorStatus = true;
+                result.errorMessage = ex.Message;
+            }
+            return result;
+        }
+        public ResultResponse Get(object item, int id)
+        {
+            ResultResponse result = new ResultResponse
+            {
+                errorStatus = false,
+                errorMessage = "",
+                data = null
+            };
+
+            ADOHelper dbHelp = new ADOHelper();
+
+            Type objectType = item.GetType();
+            ConstructorInfo objectConstructor = objectType.GetConstructor(Type.EmptyTypes);
+            object magicClassObject = objectConstructor.Invoke(new object[] { });
+            MethodInfo colmunsmethod = objectType.GetMethod("columns");
+            string columns = (string)colmunsmethod.Invoke(magicClassObject, new object[] { });
+
+            MethodInfo readerFieldsmethod = objectType.GetMethod("readerFields");
+            string[] readerFields = (string[])readerFieldsmethod.Invoke(magicClassObject, new object[] { });
+
+            MethodInfo lookupFieldsmethod = objectType.GetMethod("lookupFields");
+            string[] lookupFields = (string[])lookupFieldsmethod.Invoke(magicClassObject, new object[] { });
+
+            string SQLQuery = "SELECT " + columns + " FROM " + objectType.Name.ToString() + " WHERE Id=" + id;
+
+            try
+            {
+                using (DbConnection conn = dbHelp.getDataConnection())
+                {
+                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
+                    {
+                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
+                        {
+                            Employee _instance = new Employee();
+                            while (reader.Read())
+                            {
+                                magicClassObject = dbHelp.ReaderLoop(magicClassObject, reader, readerFields);
+                                magicClassObject = dbHelp.LookupLoop(magicClassObject, lookupFields);
+                            }
+                            result.data = magicClassObject;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errorStatus = true;
+                result.errorMessage = ex.Message;
+            }
+            return result;
+        }
+        public ResultResponse ListFiltered(object item, string whereString)
+        {
+            ResultResponse result = new ResultResponse
+            {
+                errorStatus = false,
+                errorMessage = ""
+            };
+            ADOHelper dbHelp = new ADOHelper();
+
+            Type objectType = item.GetType();
+            ConstructorInfo objectConstructor = objectType.GetConstructor(Type.EmptyTypes);
+            object magicClassObject = objectConstructor.Invoke(new object[] { });
+            MethodInfo colmunsmethod = objectType.GetMethod("columns");
+            string columns = (string)colmunsmethod.Invoke(magicClassObject, new object[] { });
+
+            MethodInfo readerFieldsmethod = objectType.GetMethod("readerFields");
+            string[] readerFields = (string[])readerFieldsmethod.Invoke(magicClassObject, new object[] { });
+
+            MethodInfo lookupFieldsmethod = objectType.GetMethod("lookupFields");
+            string[] lookupFields = (string[])lookupFieldsmethod.Invoke(magicClassObject, new object[] { });
+
+            string SQLQuery = "SELECT " + columns + " FROM " + objectType.Name.ToString() + " WHERE " + whereString;
+
+
+            try
+            {
+                using (DbConnection conn = dbHelp.getDataConnection())
+                {
+                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
+                    {
+                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
+                        {
+                            Object[] arr = new Object[1];
+                            int currentRow = 0;
+                            while (reader.Read())
+                            {
+                                if (currentRow > 0)
+                                    Array.Resize(ref arr, currentRow + 1);
+
+                                object a = "";
+                                a = dbHelp.ReaderLoop(item, reader, readerFields);
+                                a = dbHelp.LookupLoop(item, lookupFields);
+                                arr[currentRow] = a;
+                                currentRow++;
+                            }
+                            result.data = arr;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errorStatus = true;
+                result.errorMessage = ex.Message;
+            }
+            return result;
+        }
+        public ResultResponse Create(object item)
+        {
+            ResultResponse result = new ResultResponse
+            {
+                errorStatus = false,
+                errorMessage = "",
+                data = null
+            };
+
+            ADOHelper dbHelp = new ADOHelper();
+            List<string> sqlList = new List<string>();
+            Exception ErrorMessage = null;
+            string columns = "";
+            string values = "";
+
+            Type objectType = item.GetType();
+            ConstructorInfo objectConstructor = objectType.GetConstructor(Type.EmptyTypes);
+            object magicClassObject = objectConstructor.Invoke(new object[] { });
+
+            MethodInfo fieldsmethod = objectType.GetMethod("fields");
+            string[] fields = (string[])fieldsmethod.Invoke(magicClassObject, new object[] { });
+
+            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, fields, item, ref ErrorMessage);
+            if (statusOfCreate)
+            {
+                string insertQuery = "INSERT INTO " + objectType.Name.ToString() + " " + columns + " VALUES " + values;
+                sqlList.Add(insertQuery);
+                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
+                if (result.errorStatus)
+                {
+                    result.errorStatus = false;
+                    result.errorMessage = "Success";
+                    result.data = Get(item, dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM " + objectType.Name.ToString()));
+                }
+                else
+                {
+                    result.errorStatus = true;
+                    result.errorMessage = ErrorMessage.Message;
+                }
+            }
+            else
+            {
+                result.errorStatus = true;
+                result.errorMessage = ErrorMessage.Message;
+            }
+            return result;
+        }
+        public ResultResponse Update([FromBody]object item)
+        {
+            ResultResponse result = new ResultResponse
+            {
+                errorStatus = false,
+                errorMessage = "",
+                data = null
+            };
+
+            ADOHelper dbHelp = new ADOHelper();
+            List<string> sqlList = new List<string>();
+            Exception ErrorMessage = null;
+            string cloumnsWithValues = "";
+
+            Type objectType = item.GetType();
+            ConstructorInfo objectConstructor = objectType.GetConstructor(Type.EmptyTypes);
+            object magicClassObject = objectConstructor.Invoke(new object[] { });
+
+            MethodInfo fieldsmethod = objectType.GetMethod("fields");
+            string[] fields = (string[])fieldsmethod.Invoke(magicClassObject, new object[] { });
+
+            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, fields, item, ref ErrorMessage);
+            if (statusOfUpdate)
+            {
+                string insertQuery = "UPDATE " + objectType.Name.ToString() + " SET " + cloumnsWithValues + " WHERE Id=" + item.GetType().GetProperty("Id").GetValue(item);
+                sqlList.Add(insertQuery);
+
+                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
+
+                if (result.errorStatus)
+                {
+                    result.errorStatus = false;
+                    result.errorMessage = "Success";
+                    result.data = true;
+                }
+                else
+                {
+                    result.errorStatus = true;
+                    result.errorMessage = ErrorMessage.Message;
+                }
+            }
+            else
+            {
+                result.errorStatus = true;
+                result.errorMessage = ErrorMessage.Message;
+            }
+            return result;
+        }
+        public ResultResponse Delete(object item, int id)
+        {
+            ResultResponse result = new ResultResponse
+            {
+                errorStatus = false,
+                errorMessage = "",
+                data = null
+            };
+            result.errorStatus = false;
+            result.errorMessage = "";
+
+            ADOHelper dbHelp = new ADOHelper();
+            string sqlStr = "";
+            List<string> sqlList = new List<string>();
+            Exception ErrorMessage = null;
+            try
+            {
+                sqlStr = "DELETE FROM " + item.GetType().Name.ToString() + " WHERE Id = " + id;
+                sqlList.Add(sqlStr);
+                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
+                if (result.errorStatus)
+                {
+                    result.errorStatus = false;
+                    result.errorMessage = "Success";
+                    result.data = true;
+                }
+                else
+                {
+                    result.errorStatus = true;
+                    result.errorMessage = ErrorMessage.Message;
+                }
+            }
+            catch (Exception Ex)
+            {
+                result.errorStatus = true;
+                result.errorMessage = Ex.Message;
+            }
+            return result;
+        }
+    }
+
+    public class Employee
     {
         public int Id { get; set; }
         public string FirstName { get; set; }
@@ -590,71 +886,24 @@ namespace handymanworkappapi.Controllers
         public string DefaultMenuComponent { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-     "string:FirstName",
-     "string:LastName",
-     "string:NickName",
-     "string:Mobile",
-     "string:Email",
-     "string:Password",
-     "bool:Active",
-     "int:RoleId",
-     "int:LocationId",
-     "int:DefaultMenuId"
-     };
-        public string[] ReaderFields = {
-     "int:Id",
-     "string:FirstName",
-     "string:LastName",
-     "string:NickName",
-     "string:Mobile",
-     "string:Email",
-     "string:Password",
-     "bool:Active",
-     "DateTime:CreatedOnUtc",
-     "DateTime:UpdatedOnUtc",
-     "int:RoleId",
-     "int:LocationId",
-     "int:DefaultMenuId"
-     };
-        public string[] LookupReaderFields = {
-     "RoleId:RoleName:UserRoleName",
-     "LocationId:LocationName:LocationName",
-     "DefaultMenuId:DefaultMenuName:MenuOptionName",
-     "DefaultMenuId:DefaultMenuComponent:MenuOptionComponent"
-     };
-        public string TableColumnsBuilder()
+        public static string columns()
         {
-            return "Id,FirstName,LastName,NickName,Mobile,Email,Password,Active,CreatedOnUtc,UpdatedOnUtc,RoleId,LocationId,DefaultMenuId";
+            return "Id,FirstName,LastName,NickName,Mobile,Email,Password,Active,RoleId,LocationId,DefaultMenuId,CreatedOnUtc,UpdatedOnUtc";
         }
-        public string SqlScript()
+        public static string[] fields()
         {
-            return "USE [handymanworkapp]" +
-              " GO" +
-              " SET ANSI_NULLS ON" +
-              " GO" +
-              " SET QUOTED_IDENTIFIER ON" +
-              " GO" +
-              " CREATE TABLE[dbo].[Employee](" +
-              "   [Id][int] IDENTITY(1, 1) NOT NULL," +
-              "   [FirstName] [nvarchar] (50) NOT NULL," +
-              "   [LastName] [nvarchar] (50) NOT NULL," +
-              "   [NickName] [nvarchar] (50) NULL," +
-              "   [Mobile] [nvarchar] (50) NULL," +
-              "   [Email] [nvarchar] (50) NULL," +
-              "   [Password] [nvarchar] (50) NULL," +
-              "   [Active] [bit] NOT NULL," +
-              "   [RoleId] [int] NOT NULL," +
-              "   [LocationId] [int] NOT NULL," +
-              "   [DefaultMenuId] [int] NOT NULL," +
-              "   [CreatedOnUtc] [DATETIME] NOT NULL," +
-              "   [UpdatedOnUtc] [DATETIME] NOT NULL," +
-              "  CONSTRAINT[PK_Employee] PRIMARY KEY CLUSTERED" +
-              " (" +
-              "    [Id] ASC" +
-              " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-              " ) ON[PRIMARY]" +
-              " GO";
+            string[] f = { "string:FirstName", "string:LastName", "string:NickName", "string:Mobile", "string:Email", "string:Password", "bool:Active", "int:RoleId", "int:LocationId", "int:DefaultMenuId" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "string:FirstName", "string:LastName", "string:NickName", "string:Mobile", "string:Email", "string:Password", "bool:Active", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", "int:RoleId", "int:LocationId", "int:DefaultMenuId" };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { "RoleId:RoleName:UserRoleName", "LocationId:LocationName:LocationName", "DefaultMenuId:DefaultMenuName:MenuOptionName", "DefaultMenuId:DefaultMenuComponent:MenuOptionComponent" };
+            return f;
         }
     }
     [RoutePrefix("api/employee")]
@@ -664,341 +913,42 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _Employee sqlQueryHelp = new _Employee();
-
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM Employee";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_Employee> self = new List<_Employee>();
-                            while (reader.Read())
-                            {
-                                _Employee _instance = new _Employee();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Employee)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new Employee());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _Employee sqlQueryHelp = new _Employee();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM Employee WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _Employee _instance = new _Employee();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Employee)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new Employee(), id);
         }
-        [HttpPost]
-        [Route("ValidateUser")]
-        public bool ValidateUser([FromBody]_Employee item)
-        {
-            bool userValidated = false;
-
-            ADOHelper dbHelp = new ADOHelper();
-            _Employee sqlQueryHelp = new _Employee();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM Employee WHERE Email='" + item.Email + "' AND Password='" + item.Password + "'";
-
-
-            using (DbConnection conn = dbHelp.getDataConnection())
-            {
-                using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                {
-                    using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                    {
-                        while (reader.Read())
-                        {
-                            userValidated = true;
-                        }
-                    }
-                }
-            }
-
-            return userValidated;
-        }
-
-        [HttpPost]
-        [Route("GetUser")]
-        public ResultResponse GetUser([FromBody]_Employee item)
-        {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _Employee sqlQueryHelp = new _Employee();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM Employee WHERE Email='" + item.Email + "' AND Password='" + item.Password + "'";
-
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _Employee _instance = new _Employee();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Employee)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
-        }
-
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _Employee sqlQueryHelp = new _Employee();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM Employee WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_Employee> self = new List<_Employee>();
-
-                            while (reader.Read())
-                            {
-                                _Employee _instance = new _Employee();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Employee)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new Employee(), whereString);
         }
         [HttpPost]
         [Route("create")]
         [AllowAnonymous]
-        public ResultResponse Create([FromBody]_Employee item)
+        public ResultResponse Create([FromBody]Employee item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _Employee _instance = new _Employee();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO Employee " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM Employee");
-                    result.data = Get(_instance.Id);
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_Employee item)
+        public ResultResponse Update([FromBody]Employee item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            _Employee _instance = new _Employee();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = ""; // "UPDATE Employee SET " + cloumnsWithValues + " WHERE Id=" + id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = false;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            result.errorStatus = false;
-            result.errorMessage = "";
-
-            ADOHelper dbHelp = new ADOHelper();
-            _Employee sqlQueryHelp = new _Employee();
-
-            string SQLQuery = "DELETE FROM Employee WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _Employee _instance = new _Employee();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Employee)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new Employee(), id);
         }
     }
 
-    public class _InventoryItem
+    public class InventoryItem
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -1011,53 +961,24 @@ namespace handymanworkappapi.Controllers
         public DateTime UpdatedOnUtc { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-     "string:Name",
-     "string:Description",
-     "int:InventoryTypeId",
-     "int:Price",
-     "bool:Active",
-     };
-        public string[] ReaderFields = {
-     "int:Id",
-     "string:Name",
-     "string:Description",
-     "int:InventoryTypeId",
-     "int:Price",
-     "bool:Active",
-     "DateTime:CreatedOnUtc",
-     "DateTime:UpdatedOnUtc",
-     };
-        public string[] LookupReaderFields = {
-     "InventoryTypeId:InventoryTypeName:InventoryTypeName",
-     };
-        public string TableColumnsBuilder()
+        public static string[] fields()
+        {
+            string[] f = { "string:Name", "string:Description", "int:InventoryTypeId", "int:Price", "bool:Active" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "string:Name", "string:Description", "int:InventoryTypeId", "int:Price", "bool:Active", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc" };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { "InventoryTypeId:InventoryTypeName:InventoryTypeName", };
+            return f;
+        }
+        public static string columns()
         {
             return "Id,Name,Description,InventoryTypeId,Price,Active,CreatedOnUtc,UpdatedOnUtc";
-        }
-        public string SqlScript()
-        {
-            return "USE [handymanworkapp]" +
-            " GO" +
-            " SET ANSI_NULLS ON" +
-            " GO" +
-            " SET QUOTED_IDENTIFIER ON" +
-            " GO" +
-            " CREATE TABLE[dbo].[InventoryItem](" +
-            "     [Id][INT] IDENTITY(1, 1) NOT NULL," +
-            "     [Name] [NVARCHAR] (50) NOT NULL," +
-            "     [Description] [NVARCHAR] (100) NULL," +
-            " 	[InventoryTypeId]  [INT] NOT NULL," +
-            "     [Price] [INT]  NOT NULL," +
-            "     [Active] [BIT] NOT NULL," +
-            "     [CreatedOnUtc] [DATETIME] NOT NULL," +
-            "     [UpdatedOnUtc] [DATETIME] NOT NULL," +
-            "  CONSTRAINT[PK_InventoryItem] PRIMARY KEY CLUSTERED" +
-            " (" +
-            "    [Id] ASC" +
-            " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-            " ) ON[PRIMARY]" +
-            " GO";
         }
     }
     [RoutePrefix("api/inventoryitem")]
@@ -1067,261 +988,41 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _InventoryItem sqlQueryHelp = new _InventoryItem();
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM InventoryItem";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_InventoryItem> self = new List<_InventoryItem>();
-                            while (reader.Read())
-                            {
-                                _InventoryItem _instance = new _InventoryItem();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_InventoryItem)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new InventoryItem());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _InventoryItem sqlQueryHelp = new _InventoryItem();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM InventoryItem WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _InventoryItem _instance = new _InventoryItem();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_InventoryItem)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new InventoryItem(), id);
         }
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _InventoryItem sqlQueryHelp = new _InventoryItem();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM InventoryItem WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_InventoryItem> self = new List<_InventoryItem>();
-
-                            while (reader.Read())
-                            {
-                                _InventoryItem _instance = new _InventoryItem();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_InventoryItem)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new InventoryItem(), whereString);
         }
         [HttpPost]
         [Route("create")]
-        public ResultResponse Create([FromBody]_InventoryItem item)
+        public ResultResponse Create([FromBody]InventoryItem item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _InventoryItem _instance = new _InventoryItem();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO InventoryItem " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM InventoryItem");
-                    result.data = Get(_instance.Id);
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_InventoryItem item)
+        public ResultResponse Update([FromBody]InventoryItem item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            _InventoryItem _instance = new _InventoryItem();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = ""; // "UPDATE InventoryItem SET " + cloumnsWithValues + " WHERE Id=" + id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = false;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _InventoryItem sqlQueryHelp = new _InventoryItem();
-
-            string SQLQuery = "DELETE FROM InventoryItem WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _InventoryItem _instance = new _InventoryItem();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_InventoryItem)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new InventoryItem(), id);
         }
     }
 
-    public class _InventoryType
+    public class InventoryType
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -1330,44 +1031,24 @@ namespace handymanworkappapi.Controllers
         public DateTime UpdatedOnUtc { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-     "string:Name",
-     "bool:Active",
-     };
-        public string[] ReaderFields = {
-     "int:Id",
-     "string:Name",
-     "bool:Active",
-     "DateTime:CreatedOnUtc",
-     "DateTime:UpdatedOnUtc",
-     };
-        public string[] LookupReaderFields = {
-
-     };
-        public string TableColumnsBuilder()
+        public static string[] fields()
+        {
+            string[] f = { "string:Name", "bool:Active" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "string:Name", "bool:Active", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { };
+            return f;
+        }
+        public static string columns()
         {
             return "Id,Name,Active,CreatedOnUtc,UpdatedOnUtc";
-        }
-        public string SqlScript()
-        {
-            return "USE [handymanworkapp]" +
-            " GO" +
-            " SET ANSI_NULLS ON" +
-            " GO" +
-            " SET QUOTED_IDENTIFIER ON" +
-            " GO" +
-            " CREATE TABLE[dbo].[InventoryType] (" +
-            " 	[Id] [INT] IDENTITY(1,1) NOT NULL," +
-            " 	[Name] [NVARCHAR] (50) NOT NULL," +
-            " 	[Active] [BIT] NOT NULL," +
-            " 	[CreatedOnUtc] [DATETIME] NOT NULL," +
-            " 	[UpdatedOnUtc] [DATETIME] NOT NULL," +
-            "  CONSTRAINT[PK_InventoryType] PRIMARY KEY CLUSTERED " +
-            " (" +
-            " 	[Id] ASC" +
-            " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-            " ) ON[PRIMARY]" +
-            " GO";
         }
     }
     [RoutePrefix("api/inventorytype")]
@@ -1377,263 +1058,41 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _InventoryType sqlQueryHelp = new _InventoryType();
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM InventoryType";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_InventoryType> self = new List<_InventoryType>();
-                            while (reader.Read())
-                            {
-                                _InventoryType _instance = new _InventoryType();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_InventoryType)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new InventoryType());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _InventoryType sqlQueryHelp = new _InventoryType();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM InventoryType WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _InventoryType _instance = new _InventoryType();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_InventoryType)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new InventoryType(), id);
         }
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _InventoryType sqlQueryHelp = new _InventoryType();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM InventoryType WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_InventoryType> self = new List<_InventoryType>();
-
-                            while (reader.Read())
-                            {
-                                _InventoryType _instance = new _InventoryType();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_InventoryType)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new InventoryType(), whereString);
         }
         [HttpPost]
         [Route("create")]
-        public ResultResponse Create([FromBody]_InventoryType item)
+        public ResultResponse Create([FromBody]InventoryType item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _InventoryType _instance = new _InventoryType();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO InventoryType " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM InventoryType");
-                    result.data = Get(_instance.Id);
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_InventoryType item)
+        public ResultResponse Update([FromBody]InventoryType item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            _InventoryType _instance = new _InventoryType();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = ""; // "UPDATE InventoryType SET " + cloumnsWithValues + " WHERE Id=" + id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = false;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            result.errorStatus = false;
-            result.errorMessage = "";
-
-            ADOHelper dbHelp = new ADOHelper();
-            _InventoryType sqlQueryHelp = new _InventoryType();
-
-            string SQLQuery = "DELETE FROM InventoryType WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _InventoryType _instance = new _InventoryType();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_InventoryType)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new InventoryType(), id);
         }
     }
 
-    public class _Location
+    public class Location
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -1649,65 +1108,24 @@ namespace handymanworkappapi.Controllers
         public DateTime UpdatedOnUtc { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-     "string:Name",
-     "string:Street1",
-     "string:Street2",
-     "string:City",
-     "string:State",
-     "string:Country",
-     "string:Zipcode",
-     "string:Phone",
-     "string:Email",
-     };
-        public string[] ReaderFields = {
-     "int:Id",
-     "string:Name",
-     "string:Street1",
-     "string:Street2",
-     "string:City",
-     "string:State",
-     "string:Country",
-     "string:Zipcode",
-     "string:Phone",
-     "string:Email",
-     "DateTime:CreatedOnUtc",
-     "DateTime:UpdatedOnUtc"
-     };
-        public string[] LookupReaderFields = {
-
-     };
-        public string TableColumnsBuilder()
+        public static string[] fields()
+        {
+            string[] f = { "string:Name", "string:Street1", "string:Street2", "string:City", "string:State", "string:Country", "string:Zipcode", "string:Phone", "string:Email" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "string:Name", "string:Street1", "string:Street2", "string:City", "string:State", "string:Country", "string:Zipcode", "string:Phone", "string:Email", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc" };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { };
+            return f;
+        }
+        public static string columns()
         {
             return "Id,Name,Street1,Street2,City,State,Country,Zipcode,Phone,Email,CreatedOnUtc,UpdatedOnUtc";
-        }
-        public string SqlScript()
-        {
-            return "USE [handymanworkapp]" +
-              " GO" +
-              " SET ANSI_NULLS ON" +
-              " GO" +
-              " SET QUOTED_IDENTIFIER ON" +
-              " GO" +
-              " CREATE TABLE[dbo].[Location] (" +
-              " 	[Id] [INT] IDENTITY(1,1) NOT NULL," +
-              " 	[Name] [NVARCHAR] (50) NOT NULL," +
-              " 	[Street1] [NVARCHAR] (50) NOT NULL," +
-              " 	[Street2] [NVARCHAR] (50) NULL," +
-              " 	[City] [NVARCHAR] (50) NULL," +
-              " 	[State] [NVARCHAR] (50) NULL," +
-              " 	[Country] [NVARCHAR] (50) NULL," +
-              " 	[Zipcode] [NVARCHAR] (50) NOT NULL," +
-              " 	[Phone] [NVARCHAR] (50) NOT NULL," +
-              " 	[Email] [NVARCHAR] (50) NOT NULL," +
-              " 	[CreatedOnUtc]    [DATETIME]    NOT NULL," +
-              " 	[UpdatedOnUtc]    [DATETIME]    NOT NULL," +
-              "  CONSTRAINT[PK_Location] PRIMARY KEY CLUSTERED " +
-              " (" +
-              " 	[Id] ASC" +
-              " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-              " ) ON[PRIMARY]" +
-              " GO";
         }
     }
     [RoutePrefix("api/location")]
@@ -1717,260 +1135,41 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _Location sqlQueryHelp = new _Location();
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM Location";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_Location> self = new List<_Location>();
-                            while (reader.Read())
-                            {
-                                _Location _instance = new _Location();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Location)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new Location());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _Location sqlQueryHelp = new _Location();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM Location WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _Location _instance = new _Location();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Location)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new Location(), id);
         }
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _Location sqlQueryHelp = new _Location();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM Location WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_Location> self = new List<_Location>();
-
-                            while (reader.Read())
-                            {
-                                _Location _instance = new _Location();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Location)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new Location(), whereString);
         }
         [HttpPost]
         [Route("create")]
-        public ResultResponse Create([FromBody]_Location item)
+        public ResultResponse Create([FromBody]Location item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            _Location _instance = new _Location();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO Location " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM Location");
-                    result.data = Get(_instance.Id);
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_Location item)
+        public ResultResponse Update([FromBody]Location item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            _Location _instance = new _Location();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = ""; // "UPDATE Location SET " + cloumnsWithValues + " WHERE Id=" + id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = false;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _Location sqlQueryHelp = new _Location();
-
-            string SQLQuery = "DELETE FROM Location WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _Location _instance = new _Location();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Location)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new Location(), id);
         }
     }
 
-    public class _MaintenanceIssueStatus
+    public class MaintenanceIssueStatus
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -1978,41 +1177,24 @@ namespace handymanworkappapi.Controllers
         public DateTime UpdatedOnUtc { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-     "string:Name",
-     };
-        public string[] ReaderFields = {
-     "int:Id",
-     "string:Name",
-     "DateTime:CreatedOnUtc",
-     "DateTime:UpdatedOnUtc",
-     };
-        public string[] LookupReaderFields = {
-
-     };
-        public string TableColumnsBuilder()
+        public static string[] fields()
+        {
+            string[] f = { "string:Name" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "string:Name", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { };
+            return f;
+        }
+        public static string columns()
         {
             return "Id,Name,CreatedOnUtc,UpdatedOnUtc";
-        }
-        public string SqlScript()
-        {
-            return "USE [handymanworkapp]" +
-            " GO" +
-            " SET ANSI_NULLS ON" +
-            " GO" +
-            " SET QUOTED_IDENTIFIER ON" +
-            " GO" +
-            " CREATE TABLE[dbo].[MaintenanceIssueStatus](" +
-            " 	[Id] [INT] IDENTITY(1,1) NOT NULL," +
-            " 	[Name] [NVARCHAR] (50) NOT NULL," +
-            " 	[CreatedOnUtc]    [DATETIME]    NOT NULL," +
-            " 	[UpdatedOnUtc] [DATETIME] NULL," +
-            "  CONSTRAINT[PK_MaintenanceIssueStatus] PRIMARY KEY CLUSTERED " +
-            " (" +
-            " 	[Id] ASC" +
-            " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-            " ) ON[PRIMARY]" +
-            " GO";
         }
     }
     [RoutePrefix("api/maintenanceissuestatus")]
@@ -2022,262 +1204,41 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _MaintenanceIssueStatus sqlQueryHelp = new _MaintenanceIssueStatus();
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM MaintenanceIssueStatus";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_MaintenanceIssueStatus> self = new List<_MaintenanceIssueStatus>();
-                            while (reader.Read())
-                            {
-                                _MaintenanceIssueStatus _instance = new _MaintenanceIssueStatus();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenanceIssueStatus)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new MaintenanceIssueStatus());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MaintenanceIssueStatus sqlQueryHelp = new _MaintenanceIssueStatus();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM MaintenanceIssueStatus WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _MaintenanceIssueStatus _instance = new _MaintenanceIssueStatus();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenanceIssueStatus)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new MaintenanceIssueStatus(), id);
         }
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MaintenanceIssueStatus sqlQueryHelp = new _MaintenanceIssueStatus();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM MaintenanceIssueStatus WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_MaintenanceIssueStatus> self = new List<_MaintenanceIssueStatus>();
-
-                            while (reader.Read())
-                            {
-                                _MaintenanceIssueStatus _instance = new _MaintenanceIssueStatus();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenanceIssueStatus)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new MaintenanceIssueStatus(), whereString);
         }
         [HttpPost]
         [Route("create")]
-        public ResultResponse Create([FromBody]_MaintenanceIssueStatus item)
+        public ResultResponse Create([FromBody]MaintenanceIssueStatus item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _MaintenanceIssueStatus _instance = new _MaintenanceIssueStatus();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO MaintenanceIssueStatus " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM MaintenanceIssueStatus");
-                    result.data = Get(_instance.Id);
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_MaintenanceIssueStatus item)
+        public ResultResponse Update([FromBody]MaintenanceIssueStatus item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _MaintenanceIssueStatus _instance = new _MaintenanceIssueStatus();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = ""; // "UPDATE MaintenanceIssueStatus SET " + cloumnsWithValues + " WHERE Id=" + id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = false;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MaintenanceIssueStatus sqlQueryHelp = new _MaintenanceIssueStatus();
-
-            string SQLQuery = "DELETE FROM MaintenanceIssueStatus WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _MaintenanceIssueStatus _instance = new _MaintenanceIssueStatus();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenanceIssueStatus)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new MaintenanceIssueStatus(), id);
         }
     }
 
-    public class _MaintenancePriority
+    public class MaintenancePriority
     {
         public int Id { get; set; }
         public DateTime CreatedOnUtc { get; set; }
@@ -2285,41 +1246,24 @@ namespace handymanworkappapi.Controllers
         public string Name { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-     "string:Name",
-     };
-        public string[] ReaderFields = {
-     "int:Id",
-     "string:Name",
-     "DateTime:CreatedOnUtc",
-     "DateTime:UpdatedOnUtc",
-     };
-        public string[] LookupReaderFields = {
-
-     };
-        public string TableColumnsBuilder()
+        public static string[] fields()
+        {
+            string[] f = { "string:Name" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "string:Name", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { };
+            return f;
+        }
+        public static string columns()
         {
             return "Id,CreatedOnUtc,UpdatedOnUtc,Name";
-        }
-        public string SqlScript()
-        {
-            return "USE [handymanworkapp]" +
-            " GO" +
-            " SET ANSI_NULLS ON" +
-            " GO" +
-            " SET QUOTED_IDENTIFIER ON" +
-            " GO" +
-            " CREATE TABLE[dbo].[MaintenancePriority](" +
-            "   [Id][INT] IDENTITY(1, 1) NOT NULL," +
-            "   [Name][NVARCHAR](50) NOT NULL," +
-            "   [CreatedOnUtc][DATETIME] NULL," +
-            "   [UpdatedOnUtc][DATETIME] NULL," +
-            " CONSTRAINT[PK_MaintenancePriority] PRIMARY KEY CLUSTERED" +
-            " (" +
-            "   [Id] ASC" +
-            " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-            " ) ON[PRIMARY]" +
-            " GO";
         }
     }
     [RoutePrefix("api/maintenancepriority")]
@@ -2329,262 +1273,41 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _MaintenancePriority sqlQueryHelp = new _MaintenancePriority();
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM MaintenancePriority";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_MaintenancePriority> self = new List<_MaintenancePriority>();
-                            while (reader.Read())
-                            {
-                                _MaintenancePriority _instance = new _MaintenancePriority();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenancePriority)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new MaintenancePriority());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MaintenancePriority sqlQueryHelp = new _MaintenancePriority();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM MaintenancePriority WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _MaintenancePriority _instance = new _MaintenancePriority();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenancePriority)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new MaintenancePriority(), id);
         }
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MaintenancePriority sqlQueryHelp = new _MaintenancePriority();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM MaintenancePriority WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_MaintenancePriority> self = new List<_MaintenancePriority>();
-
-                            while (reader.Read())
-                            {
-                                _MaintenancePriority _instance = new _MaintenancePriority();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenancePriority)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new MaintenancePriority(), whereString);
         }
         [HttpPost]
         [Route("create")]
-        public ResultResponse Create([FromBody]_MaintenancePriority item)
+        public ResultResponse Create([FromBody]MaintenancePriority item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _MaintenancePriority _instance = new _MaintenancePriority();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO MaintenancePriority " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM MaintenancePriority");
-                    result.data = Get(_instance.Id);
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_MaintenancePriority item)
+        public ResultResponse Update([FromBody]MaintenancePriority item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _MaintenancePriority _instance = new _MaintenancePriority();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = ""; // "UPDATE MaintenancePriority SET " + cloumnsWithValues + " WHERE Id=" + id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = false;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MaintenancePriority sqlQueryHelp = new _MaintenancePriority();
-
-            string SQLQuery = "DELETE FROM MaintenancePriority WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _MaintenancePriority _instance = new _MaintenancePriority();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenancePriority)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new MaintenancePriority(), id);
         }
     }
 
-    public class _MaintenanceService
+    public class MaintenanceService
     {
         public int Id { get; set; }
         public int LocationId { get; set; }
@@ -2605,69 +1328,24 @@ namespace handymanworkappapi.Controllers
         public DateTime UpdatedOnUtc { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-     "int:LocationId",
-     "int:AssignedEmployeeId",
-     "bool:Deleted",
-     "int:MaintenanceIssueStatusId",
-     "int:MaintenancePriorityId",
-     "int:DaysToFinish",
-     "int:RoomId",
-     "string:Comment",
-     "string:Description"
-     };
-        public string[] ReaderFields = {
-     "int:Id",
-     "int:LocationId",
-     "int:AssignedEmployeeId",
-     "bool:Deleted",
-     "int:MaintenanceIssueStatusId",
-     "int:MaintenancePriorityId",
-     "int:DaysToFinish",
-     "string:Comment",
-     "string:Description",
-     "DateTime:CreatedOnUtc",
-     "DateTime:UpdatedOnUtc",
-     "int:RoomId",
-     };
-        public string[] LookupReaderFields = {
-     "LocationId:LocationName:LocationName",
-     "AssignedEmployeeId:AssignedEmployeeName:EmployeeName",
-     "MaintenanceIssueStatusId:MaintenanceIssueStatusName:MaintenanceIssueStatusName",
-     "MaintenancePriorityId:MaintenancePriorityName:MaintenancePriorityName",
-     "RoomId:RoomName:RoomName",
-     };
-        public string TableColumnsBuilder()
+        public static string[] fields()
+        {
+            string[] f = { "int:LocationId", "int:AssignedEmployeeId", "bool:Deleted", "int:MaintenanceIssueStatusId", "int:MaintenancePriorityId", "int:DaysToFinish", "int:RoomId", "string:Comment", "string:Description" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "int:LocationId", "int:AssignedEmployeeId", "bool:Deleted", "int:MaintenanceIssueStatusId", "int:MaintenancePriorityId", "int:DaysToFinish", "string:Comment", "string:Description", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", "int:RoomId", };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { "LocationId:LocationName:LocationName", "AssignedEmployeeId:AssignedEmployeeName:EmployeeName", "MaintenanceIssueStatusId:MaintenanceIssueStatusName:MaintenanceIssueStatusName", "MaintenancePriorityId:MaintenancePriorityName:MaintenancePriorityName", "RoomId:RoomName:RoomName", };
+            return f;
+        }
+        public static string columns()
         {
             return "Id,LocationId,AssignedEmployeeId,Deleted,MaintenanceIssueStatusId,MaintenancePriorityId,DaysToFinish,RoomId,Comment,Description,CreatedOnUtc,UpdatedOnUtc";
-        }
-        public string SqlScript()
-        {
-            return "USE [handymanworkapp]" +
-            " GO" +
-            " SET ANSI_NULLS ON" +
-            " GO" +
-            " SET QUOTED_IDENTIFIER ON" +
-            " GO" +
-            " CREATE TABLE[dbo].[MaintenanceService](" +
-            "   [Id][INT] IDENTITY(1, 1) NOT NULL," +
-            "   [LocationId][INT] NOT NULL," +
-            "   [AssignedEmployeeId][INT] NOT NULL," +
-            "   [Deleted][BIT] NOT NULL," +
-            "   [MaintenanceIssueStatusId][INT] NOT NULL," +
-            "   [MaintenancePriorityId][INT] NOT NULL," +
-            "   [DaysToFinish][INT] NULL," +
-            "   [RoomId][INT] NULL," +
-            "   [Comment][NVARCHAR](200) NULL," +
-            "   [Description][NVARCHAR](200) NULL," +
-            "   [CreatedOnUtc][DATETIME] NOT NULL," +
-            "   [UpdatedOnUtc][DATETIME] NOT NULL," +
-            " CONSTRAINT[PK_MaintenanceService] PRIMARY KEY CLUSTERED" +
-            " (" +
-            "   [Id] ASC" +
-            " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-            " ) ON[PRIMARY]" +
-            " GO";
         }
     }
     [RoutePrefix("api/maintenanceservice")]
@@ -2677,306 +1355,65 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _MaintenanceService sqlQueryHelp = new _MaintenanceService();
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM MaintenanceService";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_MaintenanceService> self = new List<_MaintenanceService>();
-                            while (reader.Read())
-                            {
-                                _MaintenanceService _instance = new _MaintenanceService();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenanceService)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new MaintenanceService());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MaintenanceService sqlQueryHelp = new _MaintenanceService();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM MaintenanceService WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _MaintenanceService _instance = new _MaintenanceService();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenanceService)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new MaintenanceService(), id);
         }
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MaintenanceService sqlQueryHelp = new _MaintenanceService();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM MaintenanceService WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_MaintenanceService> self = new List<_MaintenanceService>();
-
-                            while (reader.Read())
-                            {
-                                _MaintenanceService _instance = new _MaintenanceService();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenanceService)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new MaintenanceService(), whereString);
         }
         [HttpPost]
         [Route("create")]
-        public ResultResponse Create([FromBody]_MaintenanceService item)
+        public ResultResponse Create([FromBody]MaintenanceService item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _MaintenanceService _instance = new _MaintenanceService();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO MaintenanceService " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorStatus = false;
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM MaintenanceService");
-                    result.data = Get(_instance.Id).data;
-                }
-                else
-                {
-                    result.errorStatus = true;
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = true;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_MaintenanceService item)
+        public ResultResponse Update([FromBody]MaintenanceService item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _MaintenanceService _instance = new _MaintenanceService();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = "UPDATE MaintenanceService SET " + cloumnsWithValues + " WHERE Id=" + item.Id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorStatus = false;
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorStatus = true;
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = true;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            _MaintenanceService sqlQueryHelp = new _MaintenanceService();
-
-            string SQLQuery = "DELETE FROM MaintenanceService WHERE Id=" + id;
-
-            try
-            {
-                sqlList.Add(SQLQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorStatus = false;
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorStatus = true;
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new MaintenanceService(), id);
         }
     }
 
-    public class _MaintenanceServiceImages
+    public class MaintenanceServiceImages
     {
         public int Id { get; set; }
         public int MaintenanceServiceId { get; set; }
         public string Image { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-     "int:MaintenanceServiceId",
-     "varbinarymax:Image"
-     };
-        public string[] ReaderFields = {
-     "int:Id",
-     "int:MaintenanceServiceId",
-     "varbinarymax:Image",
-     };
-        public string[] LookupReaderFields = {
-     };
-        public string TableColumnsBuilder()
+        public static string[] fields()
+        {
+            string[] f = { "int:MaintenanceServiceId", "varbinarymax:Image" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "int:MaintenanceServiceId", "varbinarymax:Image", };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { };
+            return f;
+        }
+        public static string columns()
         {
             return "Id,MaintenanceServiceId,Image";
-        }
-        public string SqlScript()
-        {
-            return "USE [handymanworkapp]" +
-            " GO" +
-            " SET ANSI_NULLS ON" +
-            " GO" +
-            " SET QUOTED_IDENTIFIER ON" +
-            " GO" +
-            " CREATE TABLE[dbo].[MaintenanceService](" +
-           "  [Id][INT] IDENTITY(1, 1) NOT NULL," +
-           " [MaintenanceServiceId] [INT] NOT NULL," +
-           " [Image] [VARBINARY] (MAX) NOT NULL, " +
-           "   [CreatedOnUtc][DATETIME] NOT NULL," +
-           "   [UpdatedOnUtc][DATETIME] NOT NULL," +
-            " CONSTRAINT[PK_MaintenanceServiceImages] PRIMARY KEY CLUSTERED" +
-            " (" +
-            "   [Id] ASC" +
-            " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-            " ) ON[PRIMARY]" +
-            " GO";
         }
     }
     [RoutePrefix("api/maintenanceserviceimages")]
@@ -2986,268 +1423,41 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _MaintenanceServiceImages sqlQueryHelp = new _MaintenanceServiceImages();
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM MaintenanceServiceImages";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_MaintenanceServiceImages> self = new List<_MaintenanceServiceImages>();
-                            while (reader.Read())
-                            {
-                                _MaintenanceServiceImages _instance = new _MaintenanceServiceImages();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenanceServiceImages)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new MaintenanceServiceImages());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MaintenanceServiceImages sqlQueryHelp = new _MaintenanceServiceImages();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM MaintenanceServiceImages WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _MaintenanceServiceImages _instance = new _MaintenanceServiceImages();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenanceServiceImages)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new MaintenanceServiceImages(), id);
         }
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MaintenanceServiceImages sqlQueryHelp = new _MaintenanceServiceImages();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM MaintenanceServiceImages WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_MaintenanceServiceImages> self = new List<_MaintenanceServiceImages>();
-
-                            while (reader.Read())
-                            {
-                                _MaintenanceServiceImages _instance = new _MaintenanceServiceImages();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenanceServiceImages)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new MaintenanceServiceImages(), whereString);
         }
         [HttpPost]
         [Route("create")]
-        public ResultResponse Create([FromBody]_MaintenanceServiceImages item)
+        public ResultResponse Create([FromBody]MaintenanceServiceImages item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _MaintenanceServiceImages _instance = new _MaintenanceServiceImages();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO MaintenanceServiceImages " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorStatus = false;
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM MaintenanceServiceImages");
-                    result.data = Get(_instance.Id).data;
-                }
-                else
-                {
-                    result.errorStatus = true;
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = true;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_MaintenanceServiceImages item)
+        public ResultResponse Update([FromBody]MaintenanceServiceImages item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _MaintenanceServiceImages _instance = new _MaintenanceServiceImages();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = "UPDATE MaintenanceServiceImages SET " + cloumnsWithValues + " WHERE Id=" + item.Id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorStatus = false;
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorStatus = true;
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = true;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MaintenanceServiceImages sqlQueryHelp = new _MaintenanceServiceImages();
-
-            string SQLQuery = "DELETE FROM MaintenanceServiceImages WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _MaintenanceServiceImages _instance = new _MaintenanceServiceImages();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenanceServiceImages)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new MaintenanceServiceImages(), id);
         }
     }
 
-
-    public class _MaintenanceServiceStatus
+    public class MaintenanceServiceStatus
     {
         public int Id { get; set; }
         public int MaintenanceServiceId { get; set; }
@@ -3256,47 +1466,24 @@ namespace handymanworkappapi.Controllers
         public string CreatedByName { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-     "int:MaintenanceServiceId",
-     "string:Comment",
-            "int:CreatedById"
-     };
-        public string[] ReaderFields = {
-     "int:Id",
-     "int:MaintenanceServiceId",
-     "string:Comment",
-     "int:CreatedById",
-     "DateTime:CreatedOnUtc",
-     "DateTime:UpdatedOnUtc",
-     };
-        public string[] LookupReaderFields = {
-            "CreatedById:CreatedByName:CreatedByName",
-     };
-        public string TableColumnsBuilder()
+        public static string[] fields()
+        {
+            string[] f = { "int:MaintenanceServiceId", "string:Comment", "int:CreatedById" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "int:MaintenanceServiceId", "string:Comment", "int:CreatedById", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { "CreatedById:CreatedByName:CreatedByName", };
+            return f;
+        }
+        public static string columns()
         {
             return "Id,MaintenanceServiceId,Comment,CreatedById,CreatedOnUtc,UpdatedOnUtc";
-        }
-        public string SqlScript()
-        {
-            return "USE [handymanworkapp]" +
-            " GO" +
-            " SET ANSI_NULLS ON" +
-            " GO" +
-            " SET QUOTED_IDENTIFIER ON" +
-            " GO" +
-            " CREATE TABLE[dbo].[MaintenanceService](" +
-           "  [Id][INT] IDENTITY(1, 1) NOT NULL," +
-           " [MaintenanceServiceId] [INT] NOT NULL," +
-           " [Comment] [VARBINARY] (MAX) NOT NULL, " +
-           " [CreatedById] [INT] NOT NULL," +
-           "   [CreatedOnUtc][DATETIME] NOT NULL," +
-           "   [UpdatedOnUtc][DATETIME] NOT NULL," +
-            " CONSTRAINT[PK_MaintenanceServiceStatus] PRIMARY KEY CLUSTERED" +
-            " (" +
-            "   [Id] ASC" +
-            " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-            " ) ON[PRIMARY]" +
-            " GO";
         }
     }
     [RoutePrefix("api/MaintenanceServiceStatus")]
@@ -3306,267 +1493,41 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _MaintenanceServiceStatus sqlQueryHelp = new _MaintenanceServiceStatus();
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM MaintenanceServiceStatus";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_MaintenanceServiceStatus> self = new List<_MaintenanceServiceStatus>();
-                            while (reader.Read())
-                            {
-                                _MaintenanceServiceStatus _instance = new _MaintenanceServiceStatus();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenanceServiceStatus)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new MaintenanceServiceStatus());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MaintenanceServiceStatus sqlQueryHelp = new _MaintenanceServiceStatus();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM MaintenanceServiceStatus WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _MaintenanceServiceStatus _instance = new _MaintenanceServiceStatus();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenanceServiceStatus)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new MaintenanceServiceStatus(), id);
         }
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MaintenanceServiceStatus sqlQueryHelp = new _MaintenanceServiceStatus();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM MaintenanceServiceStatus WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_MaintenanceServiceStatus> self = new List<_MaintenanceServiceStatus>();
-
-                            while (reader.Read())
-                            {
-                                _MaintenanceServiceStatus _instance = new _MaintenanceServiceStatus();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenanceServiceStatus)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new MaintenanceServiceStatus(), whereString);
         }
         [HttpPost]
         [Route("create")]
-        public ResultResponse Create([FromBody]_MaintenanceServiceStatus item)
+        public ResultResponse Create([FromBody]MaintenanceServiceStatus item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _MaintenanceServiceStatus _instance = new _MaintenanceServiceStatus();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO MaintenanceServiceStatus " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorStatus = false;
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM MaintenanceServiceStatus");
-                    result.data = Get(_instance.Id).data;
-                }
-                else
-                {
-                    result.errorStatus = true;
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = true;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_MaintenanceServiceStatus item)
+        public ResultResponse Update([FromBody]MaintenanceServiceStatus item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _MaintenanceServiceStatus _instance = new _MaintenanceServiceStatus();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = "UPDATE MaintenanceServiceStatus SET " + cloumnsWithValues + " WHERE Id=" + item.Id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorStatus = false;
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorStatus = true;
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = true;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MaintenanceServiceStatus sqlQueryHelp = new _MaintenanceServiceStatus();
-
-            string SQLQuery = "DELETE FROM MaintenanceServiceStatus WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _MaintenanceServiceStatus _instance = new _MaintenanceServiceStatus();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MaintenanceServiceStatus)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new MaintenanceServiceStatus(), id);
         }
     }
 
-    public class _MenuOptions
+    public class MenuOptions
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -3575,44 +1536,24 @@ namespace handymanworkappapi.Controllers
         public DateTime UpdatedOnUtc { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-     "string:Name",
-     "string:Component"
-     };
-        public string[] ReaderFields = {
-     "int:Id",
-     "string:Name",
-     "string:Component",
-     "DateTime:CreatedOnUtc",
-     "DateTime:UpdatedOnUtc",
-     };
-        public string[] LookupReaderFields = {
-
-     };
-        public string TableColumnsBuilder()
+        public static string[] fields()
+        {
+            string[] f = { "string:Name", "string:Component" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "string:Name", "string:Component", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { };
+            return f;
+        }
+        public static string columns()
         {
             return "Id,Name,Component,CreatedOnUtc,UpdatedOnUtc";
-        }
-        public string SqlScript()
-        {
-            return "USE [handymanworkapp]" +
-            " GO" +
-            " SET ANSI_NULLS ON" +
-            " GO" +
-            " SET QUOTED_IDENTIFIER ON" +
-            " GO" +
-            " CREATE TABLE [dbo].[MenuOptions](" +
-            "   [Id] [INT] IDENTITY(1, 1) NOT NULL," +
-            "   [Name] [NVARCHAR](50) NOT NULL," +
-            "   [Component] [NVARCHAR](50) NULL," +
-            "   [CreatedOnUtc] [DATETIME] NOT NULL," +
-            "   [UpdatedOnUtc] [DATETIME] NOT NULL," +
-            " CONSTRAINT[PK_MenuOptions] PRIMARY KEY CLUSTERED" +
-            " (" +
-            "   [Id] ASC" +
-            " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-            " ) ON[PRIMARY]" +
-            " GO";
         }
     }
     [RoutePrefix("api/menuoptions")]
@@ -3622,262 +1563,41 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _MenuOptions sqlQueryHelp = new _MenuOptions();
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM MenuOptions";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_MenuOptions> self = new List<_MenuOptions>();
-                            while (reader.Read())
-                            {
-                                _MenuOptions _instance = new _MenuOptions();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MenuOptions)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new MenuOptions());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MenuOptions sqlQueryHelp = new _MenuOptions();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM MenuOptions WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _MenuOptions _instance = new _MenuOptions();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MenuOptions)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new MenuOptions(), id);
         }
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MenuOptions sqlQueryHelp = new _MenuOptions();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM MenuOptions WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_MenuOptions> self = new List<_MenuOptions>();
-
-                            while (reader.Read())
-                            {
-                                _MenuOptions _instance = new _MenuOptions();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MenuOptions)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new MenuOptions(), whereString);
         }
         [HttpPost]
         [Route("create")]
-        public ResultResponse Create([FromBody]_MenuOptions item)
+        public ResultResponse Create([FromBody]MenuOptions item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _MenuOptions _instance = new _MenuOptions();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO MenuOptions " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM MenuOptions");
-                    result.data = Get(_instance.Id);
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_MenuOptions item)
+        public ResultResponse Update([FromBody]MenuOptions item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _MenuOptions _instance = new _MenuOptions();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = ""; // "UPDATE MenuOptions SET " + cloumnsWithValues + " WHERE Id=" + id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = false;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _MenuOptions sqlQueryHelp = new _MenuOptions();
-
-            string SQLQuery = "DELETE FROM MenuOptions WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _MenuOptions _instance = new _MenuOptions();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_MenuOptions)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new MenuOptions(), id);
         }
     }
 
-    public class _PurchaseOrder
+    public class PurchaseOrder
     {
         public int Id { get; set; }
         public int ItemId { get; set; }
@@ -3891,54 +1611,24 @@ namespace handymanworkappapi.Controllers
         public int PurchaseOrderStatus { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-     "int:ItemId",
-     "int:VendorId",
-     "bool:Active",
-     "int:Quantity",
-     "int:PurchaseOrderStatus"
-     };
-        public string[] ReaderFields = {
-     "int:Id",
-     "int:ItemId",
-     "int:VendorId",
-     "bool:Active",
-     "int:Quantity",
-     "int:PurchaseOrderStatus",
-     "DateTime:CreatedOnUtc",
-     "DateTime:UpdatedOnUtc",
-     };
-        public string[] LookupReaderFields = {
-     "ItemId:ItemName:InventoryItemName",
-     "VendorId:VendorName:VendorName",
-     };
-        public string TableColumnsBuilder()
+        public static string[] fields()
+        {
+            string[] f = { "int:ItemId", "int:VendorId", "bool:Active", "int:Quantity", "int:PurchaseOrderStatus" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "int:ItemId", "int:VendorId", "bool:Active", "int:Quantity", "int:PurchaseOrderStatus", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { "ItemId:ItemName:InventoryItemName", "VendorId:VendorName:VendorName", };
+            return f;
+        }
+        public static string columns()
         {
             return "Id,ItemId,VendorId,Active,CreatedOnUtc,UpdatedOnUtc,Quantity,PurchaseOrderStatus";
-        }
-        public string SqlScript()
-        {
-            return "USE [handymanworkapp]" +
-            " GO" +
-            " SET ANSI_NULLS ON" +
-            " GO" +
-            " SET QUOTED_IDENTIFIER ON" +
-            " GO" +
-            " CREATE TABLE[dbo].[PurchaseOrder](" +
-            "   [Id][INT] IDENTITY(1, 1) NOT NULL," +
-            "   [ItemId][INT] NOT NULL," +
-            "   [VendorId][INT] NOT NULL," +
-            "   [Active][BIT] NOT NULL," +
-            "   [Quantity][INT] NOT NULL," +
-            "   [PurchaseOrderStatus][INT] NOT NULL," +
-            "   [CreatedOnUtc][DATETIME] NOT NULL," +
-            "   [UpdatedOnUtc][DATETIME] NOT NULL," +
-            " CONSTRAINT[PK_PurchaseOrder] PRIMARY KEY CLUSTERE" +
-            " (" +
-            "   [Id] ASC" +
-            " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-            " ) ON[PRIMARY]" +
-            " GO";
         }
     }
     [RoutePrefix("api/purchaseorder")]
@@ -3948,265 +1638,41 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _PurchaseOrder sqlQueryHelp = new _PurchaseOrder();
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM PurchaseOrder";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_PurchaseOrder> self = new List<_PurchaseOrder>();
-                            while (reader.Read())
-                            {
-                                _PurchaseOrder _instance = new _PurchaseOrder();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_PurchaseOrder)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new PurchaseOrder());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _PurchaseOrder sqlQueryHelp = new _PurchaseOrder();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM PurchaseOrder WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _PurchaseOrder _instance = new _PurchaseOrder();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_PurchaseOrder)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new PurchaseOrder(), id);
         }
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _PurchaseOrder sqlQueryHelp = new _PurchaseOrder();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM PurchaseOrder WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_PurchaseOrder> self = new List<_PurchaseOrder>();
-
-                            while (reader.Read())
-                            {
-                                _PurchaseOrder _instance = new _PurchaseOrder();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_PurchaseOrder)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new PurchaseOrder(), whereString);
         }
         [HttpPost]
         [Route("create")]
-        public ResultResponse Create([FromBody]_PurchaseOrder item)
+        public ResultResponse Create([FromBody]PurchaseOrder item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _PurchaseOrder _instance = new _PurchaseOrder();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO PurchaseOrder " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM PurchaseOrder");
-                    result.data = Get(_instance.Id);
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_PurchaseOrder item)
+        public ResultResponse Update([FromBody]PurchaseOrder item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _PurchaseOrder _instance = new _PurchaseOrder();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = ""; // "UPDATE PurchaseOrder SET " + cloumnsWithValues + " WHERE Id=" + id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = false;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            result.errorStatus = false;
-            result.errorMessage = "";
-
-            ADOHelper dbHelp = new ADOHelper();
-            _PurchaseOrder sqlQueryHelp = new _PurchaseOrder();
-
-            string SQLQuery = "DELETE FROM PurchaseOrder WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _PurchaseOrder _instance = new _PurchaseOrder();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_PurchaseOrder)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new PurchaseOrder(), id);
         }
     }
 
-    public class _PurchaseOrderStatus
+    public class PurchaseOrderStatus
     {
         public int Id { get; set; }
         public DateTime CreatedOnUtc { get; set; }
@@ -4214,41 +1680,24 @@ namespace handymanworkappapi.Controllers
         public string Name { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-     "string:Name",
-     };
-        public string[] ReaderFields = {
-     "int:Id",
-     "string:Name",
-     "DateTime:CreatedOnUtc",
-     "DateTime:UpdatedOnUtc",
-     };
-        public string[] LookupReaderFields = {
-
-     };
-        public string TableColumnsBuilder()
+        public static string[] fields()
+        {
+            string[] f = { "string:Name" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "string:Name", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { };
+            return f;
+        }
+        public static string columns()
         {
             return "Id,Name,CreatedOnUtc,UpdatedOnUtc";
-        }
-        public string SqlScript()
-        {
-            return "USE [handymanworkapp]" +
-            " GO" +
-            " SET ANSI_NULLS ON" +
-            " GO" +
-            " SET QUOTED_IDENTIFIER ON" +
-            " GO" +
-            "  CREATE TABLE[dbo].[PurchaseOrderStatus](" +
-            "   [Id][INT] IDENTITY(1, 1) NOT NULL," +
-            "   [Name] [NVARCHAR] (50) NOT NULL," +
-            "   [CreatedOnUtc] [DATETIME] NOT NULL," +
-            "   [UpdatedOnUtc] [DATETIME] NOT NULL," +
-            " CONSTRAINT[PK_PurchaseOrderStatus] PRIMARY KEY CLUSTERED " +
-            " (" +
-            "   [Id] ASC" +
-            " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-            " ) ON[PRIMARY]" +
-            " GO";
         }
     }
     [RoutePrefix("api/purchaseorderstatus")]
@@ -4258,265 +1707,41 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _PurchaseOrderStatus sqlQueryHelp = new _PurchaseOrderStatus();
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM PurchaseOrderStatus";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_PurchaseOrderStatus> self = new List<_PurchaseOrderStatus>();
-                            while (reader.Read())
-                            {
-                                _PurchaseOrderStatus _instance = new _PurchaseOrderStatus();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_PurchaseOrderStatus)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new PurchaseOrderStatus());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _PurchaseOrderStatus sqlQueryHelp = new _PurchaseOrderStatus();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM PurchaseOrderStatus WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _PurchaseOrderStatus _instance = new _PurchaseOrderStatus();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_PurchaseOrderStatus)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new PurchaseOrderStatus(), id);
         }
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _PurchaseOrderStatus sqlQueryHelp = new _PurchaseOrderStatus();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM PurchaseOrderStatus WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_PurchaseOrderStatus> self = new List<_PurchaseOrderStatus>();
-
-                            while (reader.Read())
-                            {
-                                _PurchaseOrderStatus _instance = new _PurchaseOrderStatus();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_PurchaseOrderStatus)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new PurchaseOrderStatus(), whereString);
         }
         [HttpPost]
         [Route("create")]
-        public ResultResponse Create([FromBody]_PurchaseOrderStatus item)
+        public ResultResponse Create([FromBody]PurchaseOrderStatus item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _PurchaseOrderStatus _instance = new _PurchaseOrderStatus();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO PurchaseOrderStatus " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM PurchaseOrderStatus");
-                    result.data = Get(_instance.Id);
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_PurchaseOrderStatus item)
+        public ResultResponse Update([FromBody]PurchaseOrderStatus item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _PurchaseOrderStatus _instance = new _PurchaseOrderStatus();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = ""; // "UPDATE PurchaseOrderStatus SET " + cloumnsWithValues + " WHERE Id=" + id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = false;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            result.errorStatus = false;
-            result.errorMessage = "";
-
-            ADOHelper dbHelp = new ADOHelper();
-            _PurchaseOrderStatus sqlQueryHelp = new _PurchaseOrderStatus();
-
-            string SQLQuery = "DELETE FROM PurchaseOrderStatus WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _PurchaseOrderStatus _instance = new _PurchaseOrderStatus();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_PurchaseOrderStatus)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new PurchaseOrderStatus(), id);
         }
     }
 
-    public class _Room
+    public class Room
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -4526,44 +1751,24 @@ namespace handymanworkappapi.Controllers
         public DateTime UpdatedOnUtc { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-     "string:Name",
-     "int:LocationId"
-     };
-        public string[] ReaderFields = {
-     "int:Id",
-     "string:Name",
-     "int:LocationId",
-     "DateTime:CreatedOnUtc",
-     "DateTime:UpdatedOnUtc",
-     };
-        public string[] LookupReaderFields = {
-     "LocationId:LocationName:LocationName",
-     };
-        public string TableColumnsBuilder()
+        public static string[] fields()
+        {
+            string[] f = { "string:Name", "int:LocationId" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "string:Name", "int:LocationId", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { "LocationId:LocationName:LocationName", };
+            return f;
+        }
+        public static string columns()
         {
             return "Id,Name,LocationId,CreatedOnUtc,UpdatedOnUtc";
-        }
-        public string SqlScript()
-        {
-            return "USE [handymanworkapp]" +
-            " GO" +
-            " SET ANSI_NULLS ON" +
-            " GO" +
-            " SET QUOTED_IDENTIFIER ON" +
-            " GO" +
-            " CREATE TABLE[dbo].[Room](" +
-            "   [Id][INT] IDENTITY(1, 1) NOT NULL," +
-            "   [Name][NVARCHAR](50) NOT NULL," +
-            "   [LocationId][INT] NOT NULL," +
-            "   [CreatedOnUtc][DATETIME] NOT NULL," +
-            "   [UpdatedOnUtc][DATETIME] NOT NULL," +
-            " CONSTRAINT[PK_Room] PRIMARY KEY CLUSTERED" +
-            " (" +
-            "   [Id] ASC" +
-            " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-            " ) ON[PRIMARY]" +
-            " GO";
         }
     }
     [RoutePrefix("api/room")]
@@ -4573,260 +1778,41 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _Room sqlQueryHelp = new _Room();
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM Room";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_Room> self = new List<_Room>();
-                            while (reader.Read())
-                            {
-                                _Room _instance = new _Room();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Room)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new Room());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            ADOHelper dbHelp = new ADOHelper();
-            _Room sqlQueryHelp = new _Room();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM Room WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _Room _instance = new _Room();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Room)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new Room(), id);
         }
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            ADOHelper dbHelp = new ADOHelper();
-            _Room sqlQueryHelp = new _Room();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM Room WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_Room> self = new List<_Room>();
-
-                            while (reader.Read())
-                            {
-                                _Room _instance = new _Room();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Room)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new Room(), whereString);
         }
         [HttpPost]
         [Route("create")]
-        public ResultResponse Create([FromBody]_Room item)
+        public ResultResponse Create([FromBody]Room item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _Room _instance = new _Room();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO Room " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM Room");
-                    result.data = Get(_instance.Id);
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_Room item)
+        public ResultResponse Update([FromBody]Room item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _Room _instance = new _Room();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = ""; // "UPDATE Room SET " + cloumnsWithValues + " WHERE Id=" + id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = false;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _Room sqlQueryHelp = new _Room();
-
-            string SQLQuery = "DELETE FROM Room WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _Room _instance = new _Room();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Room)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new Room(), id);
         }
     }
 
-    public class _UserRoles
+    public class UserRoles
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -4834,41 +1820,24 @@ namespace handymanworkappapi.Controllers
         public DateTime UpdatedOnUtc { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-     "string:Name",
-     };
-        public string[] ReaderFields = {
-     "int:Id",
-     "string:Name",
-     "DateTime:CreatedOnUtc",
-     "DateTime:UpdatedOnUtc",
-     };
-        public string[] LookupReaderFields = {
-
-     };
-        public string TableColumnsBuilder()
+        public static string[] fields()
+        {
+            string[] f = { "string:Name" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "string:Name", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { };
+            return f;
+        }
+        public static string columns()
         {
             return "Id,Name,CreatedOnUtc,UpdatedOnUtc";
-        }
-        public string SqlScript()
-        {
-            return "USE [handymanworkapp]" +
-            " GO" +
-            " SET ANSI_NULLS ON" +
-            " GO" +
-            " SET QUOTED_IDENTIFIER ON" +
-            " GO" +
-            " CREATE TABLE[dbo].[UserRoles](" +
-            "   [Id][INT] IDENTITY(1, 1) NOT NULL," +
-            "   [Name][NVARCHAR](50) NOT NULL," +
-            "   [CreatedOnUtc][DATETIME] NOT NULL," +
-            "   [UpdatedOnUtc][DATETIME] NOT NULL," +
-            " CONSTRAINT[PK_UserRoles] PRIMARY KEY CLUSTERED" +
-            " (" +
-            "   [Id] ASC" +
-            " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-            " ) ON[PRIMARY]" +
-            " GO";
         }
     }
     [RoutePrefix("api/userroles")]
@@ -4878,262 +1847,41 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _UserRoles sqlQueryHelp = new _UserRoles();
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM UserRoles";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_UserRoles> self = new List<_UserRoles>();
-                            while (reader.Read())
-                            {
-                                _UserRoles _instance = new _UserRoles();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_UserRoles)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new UserRoles());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _UserRoles sqlQueryHelp = new _UserRoles();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM UserRoles WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _UserRoles _instance = new _UserRoles();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_UserRoles)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new UserRoles(), id);
         }
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _UserRoles sqlQueryHelp = new _UserRoles();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM UserRoles WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_UserRoles> self = new List<_UserRoles>();
-
-                            while (reader.Read())
-                            {
-                                _UserRoles _instance = new _UserRoles();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_UserRoles)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new UserRoles(), whereString);
         }
         [HttpPost]
         [Route("create")]
-        public ResultResponse Create([FromBody]_UserRoles item)
+        public ResultResponse Create([FromBody]UserRoles item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _UserRoles _instance = new _UserRoles();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO UserRoles " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM UserRoles");
-                    result.data = Get(_instance.Id);
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_UserRoles item)
+        public ResultResponse Update([FromBody]UserRoles item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _UserRoles _instance = new _UserRoles();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = ""; // "UPDATE UserRoles SET " + cloumnsWithValues + " WHERE Id=" + id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = false;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _UserRoles sqlQueryHelp = new _UserRoles();
-
-            string SQLQuery = "DELETE FROM UserRoles WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _UserRoles _instance = new _UserRoles();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_UserRoles)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new UserRoles(), id);
         }
     }
 
-    public class _UserRolesMenuOptionsMapping
+    public class UserRolesMenuOptionsMapping
     {
         public int Id { get; set; }
         public int UserRoleId { get; set; }
@@ -5148,59 +1896,24 @@ namespace handymanworkappapi.Controllers
         public bool ReadAccess { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-     "int:UserRoleId",
-     "int:MenuOptionId",
-     "bool:DeleteAccess",
-     "bool:CreateAccess",
-     "bool:UpdateAccess",
-     "bool:UpdateAccess",
-     "bool:ReadAccess",
-     };
-        public string[] ReaderFields = {
-     "int:Id",
-     "int:UserRoleId",
-     "int:MenuOptionId",
-     "bool:DeleteAccess",
-     "bool:CreateAccess",
-     "bool:UpdateAccess",
-     "bool:UpdateAccess",
-     "bool:ReadAccess",
-     "DateTime:CreatedOnUtc",
-     "DateTime:UpdatedOnUtc",
-     };
-        public string[] LookupReaderFields = {
-     "UserRoleId:UserRoleName:UserRoleName",
-     "MenuOptionId:MenuOptionName:MenuOptionName",
-     };
-        public string TableColumnsBuilder()
+        public static string[] fields()
+        {
+            string[] f = { "int:UserRoleId", "int:MenuOptionId", "bool:DeleteAccess", "bool:CreateAccess", "bool:UpdateAccess", "bool:UpdateAccess", "bool:ReadAccess" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "int:UserRoleId", "int:MenuOptionId", "bool:DeleteAccess", "bool:CreateAccess", "bool:UpdateAccess", "bool:UpdateAccess", "bool:ReadAccess", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { "UserRoleId:UserRoleName:UserRoleName", "MenuOptionId:MenuOptionName:MenuOptionName", };
+            return f;
+        }
+        public static string columns()
         {
             return "Id,UserRoleId,CreatedOnUtc,UpdatedOnUtc,MenuOptionId,DeleteAccess,CreateAccess,UpdateAccess,ReadAccess";
-        }
-        public string SqlScript()
-        {
-            return "USE [handymanworkapp]" +
-            " GO" +
-            " SET ANSI_NULLS ON" +
-            " GO" +
-            " SET QUOTED_IDENTIFIER ON" +
-            " GO" +
-            " CREATE TABLE[dbo].[UserRolesMenuOptionsMapping](" +
-            "   [Id][INT] IDENTITY(1, 1) NOT NULL," +
-            "   [UserRoleId][INT] NOT NULL," +
-            "   [MenuOptionId][INT] NOT NULL," +
-            "   [CreateAccess][BIT] NOT NULL," +
-            "   [UpdateAccess][BIT] NOT NULL," +
-            "   [ReadAccess][BIT] NOT NULL," +
-            "   [DeleteAccess][BIT] NOT NULL," +
-            "   [CreatedOnUtc][DATETIME] NOT NULL," +
-            "   [UpdatedOnUtc][DATETIME] NOT NULL," +
-            " CONSTRAINT[PK_UserRolesMenuOptionsMapping] PRIMARY KEY CLUSTERE" +
-            " (" +
-            "   [Id] ASC" +
-            " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-            " ) ON[PRIMARY]" +
-            " GO";
         }
     }
     [RoutePrefix("api/userrolesmenuoptionsmapping")]
@@ -5210,265 +1923,41 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _UserRolesMenuOptionsMapping sqlQueryHelp = new _UserRolesMenuOptionsMapping();
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM UserRolesMenuOptionsMapping";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_UserRolesMenuOptionsMapping> self = new List<_UserRolesMenuOptionsMapping>();
-                            while (reader.Read())
-                            {
-                                _UserRolesMenuOptionsMapping _instance = new _UserRolesMenuOptionsMapping();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_UserRolesMenuOptionsMapping)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new UserRolesMenuOptionsMapping());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _UserRolesMenuOptionsMapping sqlQueryHelp = new _UserRolesMenuOptionsMapping();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM UserRolesMenuOptionsMapping WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _UserRolesMenuOptionsMapping _instance = new _UserRolesMenuOptionsMapping();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_UserRolesMenuOptionsMapping)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new UserRolesMenuOptionsMapping(), id);
         }
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _UserRolesMenuOptionsMapping sqlQueryHelp = new _UserRolesMenuOptionsMapping();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM UserRolesMenuOptionsMapping WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_UserRolesMenuOptionsMapping> self = new List<_UserRolesMenuOptionsMapping>();
-
-                            while (reader.Read())
-                            {
-                                _UserRolesMenuOptionsMapping _instance = new _UserRolesMenuOptionsMapping();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_UserRolesMenuOptionsMapping)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new UserRolesMenuOptionsMapping(), whereString);
         }
         [HttpPost]
         [Route("create")]
-        public ResultResponse Create([FromBody]_UserRolesMenuOptionsMapping item)
+        public ResultResponse Create([FromBody]UserRolesMenuOptionsMapping item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _UserRolesMenuOptionsMapping _instance = new _UserRolesMenuOptionsMapping();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO UserRolesMenuOptionsMapping " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorStatus = false;
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM UserRolesMenuOptionsMapping");
-                    result.data = Get(_instance.Id).data;
-                }
-                else
-                {
-                    result.errorStatus = true;
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = true;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_UserRolesMenuOptionsMapping item)
+        public ResultResponse Update([FromBody]UserRolesMenuOptionsMapping item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _UserRolesMenuOptionsMapping _instance = new _UserRolesMenuOptionsMapping();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = "UPDATE UserRolesMenuOptionsMapping SET " + cloumnsWithValues + " WHERE Id=" + item.Id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorStatus = false;
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorStatus = true;
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = true;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            _UserRolesMenuOptionsMapping sqlQueryHelp = new _UserRolesMenuOptionsMapping();
-
-            string SQLQuery = "DELETE FROM UserRolesMenuOptionsMapping WHERE Id=" + id;
-
-            try
-            {
-                sqlList.Add(SQLQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorStatus = false;
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorStatus = true;
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new UserRolesMenuOptionsMapping(), id);
         }
     }
 
-    public class _Vendor
+    public class Vendor
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -5485,68 +1974,24 @@ namespace handymanworkappapi.Controllers
         public DateTime UpdatedOnUtc { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
-        public string[] Fields = {
-       "string:Name",
-       "string:Phone",
-       "string:Email",
-       "string:Street1",
-       "string:Street2",
-       "string:City",
-       "string:State",
-       "string:Zipcode",
-       "string:Country",
-       "bool:Active",
-     };
-        public string[] ReaderFields = {
-       "int:Id",
-       "string:Name",
-       "string:Phone",
-       "string:Email",
-       "string:Street1",
-       "string:Street2",
-       "string:City",
-       "string:State",
-       "string:Zipcode",
-       "string:Country",
-       "bool:Active",
-       "DateTime:CreatedOnUtc",
-       "DateTime:UpdatedOnUtc",
-     };
-        public string[] LookupReaderFields = {
-
-     };
-        public string TableColumnsBuilder()
+        public static string[] fields()
+        {
+            string[] f = { "string:Name", "string:Phone", "string:Email", "string:Street1", "string:Street2", "string:City", "string:State", "string:Zipcode", "string:Country", "bool:Active" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:Id", "string:Name", "string:Phone", "string:Email", "string:Street1", "string:Street2", "string:City", "string:State", "string:Zipcode", "string:Country", "bool:Active", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { };
+            return f;
+        }
+        public static string columns()
         {
             return "Id,Name,Phone,Email,Street1,Street2,City,State,Zipcode,Country,Active,CreatedOnUtc,UpdatedOnUtc";
-        }
-        public string SqlScript()
-        {
-            return "USE [handymanworkapp]" +
-            " GO" +
-            " SET ANSI_NULLS ON" +
-            " GO" +
-            " SET QUOTED_IDENTIFIER ON" +
-            " GO" +
-            " CREATE TABLE[dbo].[Vendor](" +
-            "   [Id][INT] IDENTITY(1, 1) NOT NULL," +
-            "   [Name][NVARCHAR](50) NOT NULL," +
-            "   [Phone][NVARCHAR](50) NULL," +
-            "   [Email][NVARCHAR](50) NULL," +
-            "   [Street1][NVARCHAR](50) NULL," +
-            "   [Street2][NVARCHAR](50) NULL," +
-            "   [City][NVARCHAR](50) NULL," +
-            "   [State][NVARCHAR](50) NULL," +
-            "   [Zipcode][NVARCHAR](50) NULL," +
-            "   [Country][NVARCHAR](50) NULL," +
-            "   [Active][BIT] NOT NULL," +
-            "   [CreatedOnUtc][DATETIME] NOT NULL," +
-            "   [UpdatedOnUtc][DATETIME] NOT NULL," +
-            " CONSTRAINT[PK_Vendor] PRIMARY KEY CLUSTERED" +
-            " (" +
-            "   [Id] ASC" +
-            " )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]" +
-            " ) ON[PRIMARY]" +
-            " GO";
         }
     }
     [RoutePrefix("api/vendor")]
@@ -5556,258 +2001,37 @@ namespace handymanworkappapi.Controllers
         [Route("listAll")]
         public ResultResponse ListAll()
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-            try
-            {
-                ADOHelper dbHelp = new ADOHelper();
-                _Vendor sqlQueryHelp = new _Vendor();
-                string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder()) + " FROM Vendor";
-
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_Vendor> self = new List<_Vendor>();
-                            while (reader.Read())
-                            {
-                                _Vendor _instance = new _Vendor();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Vendor)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListAll(new Vendor());
         }
         [HttpGet]
         [Route("get/{id}")]
         public ResultResponse Get(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _Vendor sqlQueryHelp = new _Vendor();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM Vendor WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _Vendor _instance = new _Vendor();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Vendor)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Get(new Vendor(), id);
         }
         [HttpGet]
         [Route("listFiltered/{whereString}")]
         public ResultResponse ListFiltered(string whereString)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _Vendor sqlQueryHelp = new _Vendor();
-
-            string SQLQuery = "SELECT " + (sqlQueryHelp.TableColumnsBuilder())
-                         + " FROM Vendor WHERE " + whereString;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            List<_Vendor> self = new List<_Vendor>();
-
-                            while (reader.Read())
-                            {
-                                _Vendor _instance = new _Vendor();
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Vendor)obj1;
-                                self.Add(_instance);
-                            }
-                            result.data = self;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).ListFiltered(new Vendor(), whereString);
         }
         [HttpPost]
         [Route("create")]
-        public ResultResponse Create([FromBody]_Vendor item)
+        public ResultResponse Create([FromBody]Vendor item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _Vendor _instance = new _Vendor();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string columns = "";
-            string values = "";
-
-            bool statusOfCreate = dbHelp.InsertStatement(ref columns, ref values, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfCreate)
-            {
-                string insertQuery = "INSERT INTO Vendor " + columns + " VALUES " + values;
-                sqlList.Add(insertQuery);
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                    _instance.Id = dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM Vendor");
-                    result.data = Get(_instance.Id);
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Create(item);
         }
         [HttpPost]
         [Route("update")]
-        public ResultResponse Update([FromBody]_Vendor item)
+        public ResultResponse Update([FromBody]Vendor item)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            _Vendor _instance = new _Vendor();
-            ADOHelper dbHelp = new ADOHelper();
-            List<string> sqlList = new List<string>();
-            Exception ErrorMessage = null;
-            string cloumnsWithValues = "";
-
-            bool statusOfUpdate = dbHelp.UpdateStatement(ref cloumnsWithValues, _instance.Fields, item, ref ErrorMessage);
-            if (statusOfUpdate)
-            {
-                string insertQuery = ""; // "UPDATE Vendor SET " + cloumnsWithValues + " WHERE Id=" + id;
-                sqlList.Add(insertQuery);
-
-                result.errorStatus = dbHelp.callInsertUpdate(sqlList, ref ErrorMessage);
-
-                if (result.errorStatus)
-                {
-                    result.errorMessage = "Success";
-                }
-                else
-                {
-                    result.errorMessage = ErrorMessage.Message;
-                }
-            }
-            else
-            {
-                result.errorStatus = false;
-                result.errorMessage = ErrorMessage.Message;
-            }
-            return result;
+            return (new Crud()).Update(item);
         }
         [HttpGet]
         [Route("delete/{id}")]
         public ResultResponse Delete(int id)
         {
-            ResultResponse result = new ResultResponse
-            {
-                errorStatus = false,
-                errorMessage = ""
-            };
-
-            ADOHelper dbHelp = new ADOHelper();
-            _Vendor sqlQueryHelp = new _Vendor();
-
-            string SQLQuery = "DELETE FROM Vendor WHERE Id=" + id;
-
-            try
-            {
-                using (DbConnection conn = dbHelp.getDataConnection())
-                {
-                    using (DbCommand cmd = dbHelp.getDataCommand(conn, SQLQuery))
-                    {
-                        using (DbDataReader reader = dbHelp.getDataReader(cmd))
-                        {
-                            _Vendor _instance = new _Vendor();
-                            while (reader.Read())
-                            {
-                                object obj1 = "";
-                                obj1 = dbHelp.ReaderLoop(_instance, reader, _instance.ReaderFields);
-                                obj1 = dbHelp.LookupLoop(_instance, _instance.LookupReaderFields);
-                                _instance = (_Vendor)obj1;
-                            }
-                            result.data = _instance;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.errorStatus = true;
-                result.errorMessage = ex.Message;
-            }
-            return result;
+            return (new Crud()).Delete(new Vendor(), id);
         }
     }
 }
