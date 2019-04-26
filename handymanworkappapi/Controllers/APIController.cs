@@ -605,9 +605,137 @@ namespace handymanworkappapi.Controllers
                             List<object> self = new List<object>();
                             while (reader.Read())
                             {
-                                magicClassObject = dbHelp.ReaderLoop(magicClassObject, reader, readerFields);
-                                magicClassObject = dbHelp.LookupLoop(magicClassObject, lookupFields);
-                                self.Add(magicClassObject);
+                                if (objectType.Name.ToString() == "Employee")
+                                {
+                                    object obj = null;
+                                    Employee instance = new Employee();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "InventoryItem")
+                                {
+                                    object obj = null;
+                                    InventoryItem instance = new InventoryItem();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "InventoryType")
+                                {
+                                    object obj = null;
+                                    InventoryType instance = new InventoryType();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "Location")
+                                {
+                                    object obj = null;
+                                    Location instance = new Location();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "MaintenanceIssueStatus")
+                                {
+                                    object obj = null;
+                                    MaintenanceIssueStatus instance = new MaintenanceIssueStatus();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+
+                                if (objectType.Name.ToString() == "MaintenancePriority")
+                                {
+                                    object obj = null;
+                                    MaintenancePriority instance = new MaintenancePriority();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "MaintenanceService")
+                                {
+                                    object obj = null;
+                                    MaintenanceService instance = new MaintenanceService();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "MaintenanceServiceImages")
+                                {
+                                    object obj = null;
+                                    MaintenanceServiceImages instance = new MaintenanceServiceImages();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "MaintenanceServiceStatus")
+                                {
+                                    object obj = null;
+                                    MaintenanceServiceStatus instance = new MaintenanceServiceStatus();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "MenuOptions")
+                                {
+                                    object obj = null;
+                                    MenuOptions instance = new MenuOptions();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "PurchaseOrder")
+                                {
+                                    object obj = null;
+                                    PurchaseOrder instance = new PurchaseOrder();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+
+                                if (objectType.Name.ToString() == "PurchaseOrderStatus")
+                                {
+                                    object obj = null;
+                                    PurchaseOrderStatus instance = new PurchaseOrderStatus();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+
+                                if (objectType.Name.ToString() == "Room")
+                                {
+                                    object obj = null;
+                                    Room instance = new Room();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "UserRoles")
+                                {
+                                    object obj = null;
+                                    UserRoles instance = new UserRoles();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "UserRolesMenuOptionsMapping")
+                                {
+                                    object obj = null;
+                                    UserRolesMenuOptionsMapping instance = new UserRolesMenuOptionsMapping();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "Vendor")
+                                {
+                                    object obj = null;
+                                    Vendor instance = new Vendor();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
                             }
                             result.data = self;
                         }
@@ -654,13 +782,110 @@ namespace handymanworkappapi.Controllers
                     {
                         using (DbDataReader reader = dbHelp.getDataReader(cmd))
                         {
-                            Employee _instance = new Employee();
+                            object obj = null;
                             while (reader.Read())
                             {
-                                magicClassObject = dbHelp.ReaderLoop(magicClassObject, reader, readerFields);
-                                magicClassObject = dbHelp.LookupLoop(magicClassObject, lookupFields);
+                                if (objectType.Name.ToString() == "Employee")
+                                {
+                                    Employee instance = new Employee();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+                                if (objectType.Name.ToString() == "InventoryItem")
+                                {
+                                    InventoryItem instance = new InventoryItem();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+                                if (objectType.Name.ToString() == "InventoryType")
+                                {
+                                    InventoryType instance = new InventoryType();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+                                if (objectType.Name.ToString() == "Location")
+                                {
+                                    Location instance = new Location();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+                                if (objectType.Name.ToString() == "MaintenanceIssueStatus")
+                                {
+                                    MaintenanceIssueStatus instance = new MaintenanceIssueStatus();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+
+                                if (objectType.Name.ToString() == "MaintenancePriority")
+                                {
+                                    MaintenancePriority instance = new MaintenancePriority();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+                                if (objectType.Name.ToString() == "MaintenanceService")
+                                {
+                                    MaintenanceService instance = new MaintenanceService();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+                                if (objectType.Name.ToString() == "MaintenanceServiceImages")
+                                {
+                                    MaintenanceServiceImages instance = new MaintenanceServiceImages();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+                                if (objectType.Name.ToString() == "MaintenanceServiceStatus")
+                                {
+                                    MaintenanceServiceStatus instance = new MaintenanceServiceStatus();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+                                if (objectType.Name.ToString() == "MenuOptions")
+                                {
+                                    MenuOptions instance = new MenuOptions();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+                                if (objectType.Name.ToString() == "PurchaseOrder")
+                                {
+                                    PurchaseOrder instance = new PurchaseOrder();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+
+                                if (objectType.Name.ToString() == "PurchaseOrderStatus")
+                                {
+                                    PurchaseOrderStatus instance = new PurchaseOrderStatus();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+
+                                if (objectType.Name.ToString() == "Room")
+                                {
+                                    Room instance = new Room();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+                                if (objectType.Name.ToString() == "UserRoles")
+                                {
+                                    UserRoles instance = new UserRoles();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+                                if (objectType.Name.ToString() == "UserRolesMenuOptionsMapping")
+                                {
+                                    UserRolesMenuOptionsMapping instance = new UserRolesMenuOptionsMapping();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+                                if (objectType.Name.ToString() == "Vendor")
+                                {
+                                    Vendor instance = new Vendor();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
                             }
-                            result.data = magicClassObject;
+                            result.data = obj;
                         }
                     }
                 }
@@ -704,20 +929,142 @@ namespace handymanworkappapi.Controllers
                     {
                         using (DbDataReader reader = dbHelp.getDataReader(cmd))
                         {
-                            Object[] arr = new Object[1];
-                            int currentRow = 0;
+                            List<object> self = new List<object>();
                             while (reader.Read())
                             {
-                                if (currentRow > 0)
-                                    Array.Resize(ref arr, currentRow + 1);
+                                if (objectType.Name.ToString() == "Employee")
+                                {
+                                    object obj = null;
+                                    Employee instance = new Employee();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "InventoryItem")
+                                {
+                                    object obj = null;
+                                    InventoryItem instance = new InventoryItem();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "InventoryType")
+                                {
+                                    object obj = null;
+                                    InventoryType instance = new InventoryType();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "Location")
+                                {
+                                    object obj = null;
+                                    Location instance = new Location();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "MaintenanceIssueStatus")
+                                {
+                                    object obj = null;
+                                    MaintenanceIssueStatus instance = new MaintenanceIssueStatus();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
 
-                                object a = "";
-                                a = dbHelp.ReaderLoop(item, reader, readerFields);
-                                a = dbHelp.LookupLoop(item, lookupFields);
-                                arr[currentRow] = a;
-                                currentRow++;
+                                if (objectType.Name.ToString() == "MaintenancePriority")
+                                {
+                                    object obj = null;
+                                    MaintenancePriority instance = new MaintenancePriority();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "MaintenanceService")
+                                {
+                                    object obj = null;
+                                    MaintenanceService instance = new MaintenanceService();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "MaintenanceServiceImages")
+                                {
+                                    object obj = null;
+                                    MaintenanceServiceImages instance = new MaintenanceServiceImages();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "MaintenanceServiceStatus")
+                                {
+                                    object obj = null;
+                                    MaintenanceServiceStatus instance = new MaintenanceServiceStatus();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "MenuOptions")
+                                {
+                                    object obj = null;
+                                    MenuOptions instance = new MenuOptions();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "PurchaseOrder")
+                                {
+                                    object obj = null;
+                                    PurchaseOrder instance = new PurchaseOrder();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+
+                                if (objectType.Name.ToString() == "PurchaseOrderStatus")
+                                {
+                                    object obj = null;
+                                    PurchaseOrderStatus instance = new PurchaseOrderStatus();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+
+                                if (objectType.Name.ToString() == "Room")
+                                {
+                                    object obj = null;
+                                    Room instance = new Room();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "UserRoles")
+                                {
+                                    object obj = null;
+                                    UserRoles instance = new UserRoles();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "UserRolesMenuOptionsMapping")
+                                {
+                                    object obj = null;
+                                    UserRolesMenuOptionsMapping instance = new UserRolesMenuOptionsMapping();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "Vendor")
+                                {
+                                    object obj = null;
+                                    Vendor instance = new Vendor();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
                             }
-                            result.data = arr;
+                            result.data = self;
                         }
                     }
                 }
