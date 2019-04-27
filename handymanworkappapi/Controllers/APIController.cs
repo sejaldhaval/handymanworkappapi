@@ -1108,7 +1108,7 @@ namespace handymanworkappapi.Controllers
                 {
                     result.errorStatus = false;
                     result.errorMessage = "Success";
-                    result.data = Get(item, dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM " + objectType.Name.ToString()));
+                    result.data = Get(item, dbHelp.callExecuteQueryIdent("SELECT MAX(Id) as identCount FROM " + objectType.Name.ToString())).data;
                 }
                 else
                 {
@@ -1276,7 +1276,6 @@ namespace handymanworkappapi.Controllers
         }
         [HttpPost]
         [Route("create")]
-        [AllowAnonymous]
         public ResultResponse Create([FromBody]Employee item)
         {
             return (new Crud()).Create(item);
@@ -1811,6 +1810,8 @@ namespace handymanworkappapi.Controllers
         public string Comment { get; set; }
         public int CreatedById { get; set; }
         public string CreatedByName { get; set; }
+        public DateTime CreatedOnUtc { get; set; }
+        public DateTime UpdatedOnUtc { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
         public static string[] fields()
