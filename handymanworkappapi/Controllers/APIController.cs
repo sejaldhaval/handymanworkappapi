@@ -2342,6 +2342,7 @@ namespace handymanworkappapi.Controllers
             return "Id,Name,Phone,Email,Street1,Street2,City,State,Zipcode,Country,Active,CreatedOnUtc,UpdatedOnUtc";
         }
     }
+
     [RoutePrefix("api/vendor")]
     public class VendorController : ApiController
     {
@@ -2380,6 +2381,153 @@ namespace handymanworkappapi.Controllers
         public ResultResponse Delete(int id)
         {
             return (new Crud()).Delete(new Vendor(), id);
+        }
+    }
+
+    public class EmployeeSchedule
+    {
+        public int Id { get; set; }
+        public int EmployeeId { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public DateTime CreatedOnUtc { get; set; }
+        public DateTime UpdatedOnUtc { get; set; }
+        public string errorMessage { get; set; }
+        public bool errorStatus { get; set; }
+        public static string[] fields()
+        {
+            string[] f = { "int:EmployeeId", "DateTime:StartDate", "DateTime:EndDate" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:EmployeeId", "DateTime:StartDate", "DateTime:EndDate", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { "EmployeeId:EmployeeName:EmployeeName" };
+            return f;
+        }
+        public static string columns()
+        {
+            return "Id,EmployeeId,StartDate,EndDate,CreatedOnUtc,UpdatedOnUtc";
+        }
+    }
+    [RoutePrefix("api/employeeschedule")]
+    public class EmployeeScheduleController : ApiController
+    {
+        [HttpGet]
+        [Route("listAll")]
+        public ResultResponse ListAll()
+        {
+            return (new Crud()).ListAll(new EmployeeSchedule());
+        }
+        [HttpGet]
+        [Route("get/{id}")]
+        public ResultResponse Get(int id)
+        {
+            return (new Crud()).Get(new EmployeeSchedule(), id);
+        }
+        [HttpGet]
+        [Route("listFiltered/{whereString}")]
+        public ResultResponse ListFiltered(string whereString)
+        {
+            return (new Crud()).ListFiltered(new EmployeeSchedule(), whereString);
+        }
+        [HttpPost]
+        [Route("create")]
+        public ResultResponse Create([FromBody]EmployeeSchedule item)
+        {
+            return (new Crud()).Create(item);
+        }
+        [HttpPost]
+        [Route("update")]
+        public ResultResponse Update([FromBody]EmployeeSchedule item)
+        {
+            return (new Crud()).Update(item);
+        }
+        [HttpGet]
+        [Route("delete/{id}")]
+        public ResultResponse Delete(int id)
+        {
+            return (new Crud()).Delete(new EmployeeSchedule(), id);
+        }
+    }
+
+    public class EmployeeScheduleWeek
+    {
+        public int Id { get; set; }
+        public int EmployeeScheduleId { get; set; }
+        public DateTime? Monday { get; set; }
+        public DateTime? Tuesday { get; set; }
+        public DateTime? Wednesday { get; set; }
+        public DateTime? Thursday { get; set; }
+        public DateTime? Friday { get; set; }
+        public DateTime? Saturday { get; set; }
+        public DateTime? Sunday { get; set; }
+        public DateTime CreatedOnUtc { get; set; }
+        public DateTime UpdatedOnUtc { get; set; }
+        public string errorMessage { get; set; }
+        public bool errorStatus { get; set; }
+        public static string[] fields()
+        {
+            string[] f = { "int:EmployeeScheduleId", "DateTime:Monday", "DateTime:Tuesday", "DateTime:Wednesday", "DateTime:Thursday", "DateTime:Friday", "DateTime:Saturday", "DateTime:Sunday" };
+            return f;
+        }
+        public static string[] readerFields()
+        {
+            string[] f = { "int:EmployeeId", "DateTime:Monday", "DateTime:Tuesday", "DateTime:Wednesday", "DateTime:Thursday", "DateTime:Friday", "DateTime:Saturday", "DateTime:Sunday", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            return f;
+        }
+        public static string[] lookupFields()
+        {
+            string[] f = { };
+            return f;
+        }
+        public static string columns()
+        {
+            return "Id,EmployeeId,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,CreatedOnUtc,UpdatedOnUtc";
+        }
+    }
+    [RoutePrefix("api/employeescheduleweek")]
+    public class EmployeeScheduleWeekController : ApiController
+    {
+        [HttpGet]
+        [Route("listAll")]
+        public ResultResponse ListAll()
+        {
+            return (new Crud()).ListAll(new EmployeeScheduleWeek());
+        }
+        [HttpGet]
+        [Route("get/{id}")]
+        public ResultResponse Get(int id)
+        {
+            return (new Crud()).Get(new EmployeeScheduleWeek(), id);
+        }
+        [HttpGet]
+        [Route("listFiltered/{whereString}")]
+        public ResultResponse ListFiltered(string whereString)
+        {
+            return (new Crud()).ListFiltered(new EmployeeScheduleWeek(), whereString);
+        }
+        [HttpPost]
+        [Route("create")]
+        public ResultResponse Create([FromBody]EmployeeScheduleWeek item)
+        {
+            return (new Crud()).Create(item);
+        }
+        [HttpPost]
+        [Route("update")]
+        public ResultResponse Update([FromBody]EmployeeScheduleWeek item)
+        {
+            return (new Crud()).Update(item);
+        }
+        [HttpGet]
+        [Route("delete/{id}")]
+        public ResultResponse Delete(int id)
+        {
+            return (new Crud()).Delete(new EmployeeScheduleWeek(), id);
         }
     }
 }
