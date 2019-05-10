@@ -364,7 +364,7 @@ namespace handymanworkappapi.Controllers
                             value = value + "," + "'" + item.GetType().GetProperty(b).GetValue(item) + "'";
                             break;
                         case "DateTime":
-                            value = value + "," + item.GetType().GetProperty(b).GetValue(item);
+                            value = value + "," + "'" + item.GetType().GetProperty(b).GetValue(item) + "'";
                             break;
                         case "varbinarymax":
                             value = value + "," + "CONVERT(varbinary(max),'" + item.GetType().GetProperty(b).GetValue(item) + "')";
@@ -613,6 +613,22 @@ namespace handymanworkappapi.Controllers
                                     obj = dbHelp.LookupLoop(instance, lookupFields);
                                     self.Add(obj);
                                 }
+                                if (objectType.Name.ToString() == "EmployeeSchedule")
+                                {
+                                    object obj = null;
+                                    EmployeeSchedule instance = new EmployeeSchedule();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "EmployeeScheduleWeek")
+                                {
+                                    object obj = null;
+                                    EmployeeScheduleWeek instance = new EmployeeScheduleWeek();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
                                 if (objectType.Name.ToString() == "InventoryItem")
                                 {
                                     object obj = null;
@@ -791,6 +807,18 @@ namespace handymanworkappapi.Controllers
                                     obj = dbHelp.ReaderLoop(instance, reader, readerFields);
                                     obj = dbHelp.LookupLoop(instance, lookupFields);
                                 }
+                                if (objectType.Name.ToString() == "EmployeeSchedule")
+                                {
+                                    EmployeeSchedule instance = new EmployeeSchedule();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
+                                if (objectType.Name.ToString() == "EmployeeScheduleWeek")
+                                {
+                                    EmployeeScheduleWeek instance = new EmployeeScheduleWeek();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                }
                                 if (objectType.Name.ToString() == "InventoryItem")
                                 {
                                     InventoryItem instance = new InventoryItem();
@@ -902,7 +930,8 @@ namespace handymanworkappapi.Controllers
             ResultResponse result = new ResultResponse
             {
                 errorStatus = false,
-                errorMessage = ""
+                errorMessage = "",
+                data = null
             };
             ADOHelper dbHelp = new ADOHelper();
 
@@ -936,6 +965,22 @@ namespace handymanworkappapi.Controllers
                                 {
                                     object obj = null;
                                     Employee instance = new Employee();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "EmployeeSchedule")
+                                {
+                                    object obj = null;
+                                    EmployeeSchedule instance = new EmployeeSchedule();
+                                    obj = dbHelp.ReaderLoop(instance, reader, readerFields);
+                                    obj = dbHelp.LookupLoop(instance, lookupFields);
+                                    self.Add(obj);
+                                }
+                                if (objectType.Name.ToString() == "EmployeeScheduleWeek")
+                                {
+                                    object obj = null;
+                                    EmployeeScheduleWeek instance = new EmployeeScheduleWeek();
                                     obj = dbHelp.ReaderLoop(instance, reader, readerFields);
                                     obj = dbHelp.LookupLoop(instance, lookupFields);
                                     self.Add(obj);
@@ -2401,7 +2446,7 @@ namespace handymanworkappapi.Controllers
         }
         public static string[] readerFields()
         {
-            string[] f = { "int:EmployeeId", "DateTime:StartDate", "DateTime:EndDate", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            string[] f = { "int:Id","int:EmployeeId", "DateTime:StartDate", "DateTime:EndDate", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
             return f;
         }
         public static string[] lookupFields()
@@ -2459,25 +2504,32 @@ namespace handymanworkappapi.Controllers
     {
         public int Id { get; set; }
         public int EmployeeScheduleId { get; set; }
-        public DateTime? Monday { get; set; }
-        public DateTime? Tuesday { get; set; }
-        public DateTime? Wednesday { get; set; }
-        public DateTime? Thursday { get; set; }
-        public DateTime? Friday { get; set; }
-        public DateTime? Saturday { get; set; }
-        public DateTime? Sunday { get; set; }
+        public DateTime? MondayIn { get; set; }
+        public DateTime? MondayOut { get; set; }
+        public DateTime? TuesdayIn { get; set; }
+        public DateTime? TuesdayOut { get; set; }
+        public DateTime? WednesdayIn { get; set; }
+        public DateTime? WednesdayOut { get; set; }
+        public DateTime? ThursdayIn { get; set; }
+        public DateTime? ThursdayOut { get; set; }
+        public DateTime? FridayIn { get; set; }
+        public DateTime? FridayOut { get; set; }
+        public DateTime? SaturdayIn { get; set; }
+        public DateTime? SaturdayOut { get; set; }
+        public DateTime? SundayIn { get; set; }
+        public DateTime? SundayOut { get; set; }
         public DateTime CreatedOnUtc { get; set; }
         public DateTime UpdatedOnUtc { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
         public static string[] fields()
         {
-            string[] f = { "int:EmployeeScheduleId", "DateTime:Monday", "DateTime:Tuesday", "DateTime:Wednesday", "DateTime:Thursday", "DateTime:Friday", "DateTime:Saturday", "DateTime:Sunday" };
+            string[] f = { "int:EmployeeScheduleId", "DateTime:MondayIn", "DateTime:MondayOut", "DateTime:TuesdayIn", "DateTime:TuesdayOut", "DateTime:WednesdayIn", "DateTime:WednesdayOut", "DateTime:ThursdayIn", "DateTime:ThursdayOut", "DateTime:FridayIn", "DateTime:FridayOut", "DateTime:SaturdayIn", "DateTime:SaturdayOut", "DateTime:SundayIn", "DateTime:SundayOut" };
             return f;
         }
         public static string[] readerFields()
         {
-            string[] f = { "int:EmployeeId", "DateTime:Monday", "DateTime:Tuesday", "DateTime:Wednesday", "DateTime:Thursday", "DateTime:Friday", "DateTime:Saturday", "DateTime:Sunday", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            string[] f = { "int:Id","int:EmployeeScheduleId", "DateTime:MondayIn", "DateTime:MondayOut", "DateTime:TuesdayIn", "DateTime:TuesdayOut", "DateTime:WednesdayIn", "DateTime:WednesdayOut", "DateTime:ThursdayIn", "DateTime:ThursdayOut", "DateTime:FridayIn", "DateTime:FridayOut", "DateTime:SaturdayIn", "DateTime:SaturdayOut", "DateTime:SundayIn", "DateTime:SundayOut", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
             return f;
         }
         public static string[] lookupFields()
@@ -2487,7 +2539,7 @@ namespace handymanworkappapi.Controllers
         }
         public static string columns()
         {
-            return "Id,EmployeeId,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,CreatedOnUtc,UpdatedOnUtc";
+            return "Id,EmployeeScheduleId,MondayIn,MondayOut,TuesdayIn,TuesdayOut,WednesdayIn,WednesdayOut,ThursdayIn,ThursdayOut,FridayIn,FridayOut,SaturdayIn,SaturdayOut,SundayIn,SundayOut,CreatedOnUtc,UpdatedOnUtc";
         }
     }
     [RoutePrefix("api/employeescheduleweek")]
