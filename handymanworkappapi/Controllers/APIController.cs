@@ -7,7 +7,24 @@ using System.Data.SqlClient;
 using System.Configuration;
 using System.Reflection;
 using System.Text;
-using Thinktecture.IdentityModel.Client;
+using SendGrid;
+using SendGrid.Helpers.Mail;
+using System.Net.Mail;
+using System.Net.Mime;
+using System.Threading.Tasks;
+
+using System.Net;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Web;
+using System.Web.Http.ModelBinding;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Owin.Security;
+using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.OAuth;
+using SendGrid;
 
 namespace handymanworkappapi.Controllers
 {
@@ -366,6 +383,9 @@ namespace handymanworkappapi.Controllers
                         case "DateTime":
                             value = value + "," + "'" + item.GetType().GetProperty(b).GetValue(item) + "'";
                             break;
+                        case "time":
+                            value = value + "," + "'" + item.GetType().GetProperty(b).GetValue(item) + "'";
+                            break;
                         case "varbinarymax":
                             value = value + "," + "CONVERT(varbinary(max),'" + item.GetType().GetProperty(b).GetValue(item) + "')";
                             break;
@@ -415,6 +435,9 @@ namespace handymanworkappapi.Controllers
                             value = value + "," + s.Split(':')[1] + "='" + item.GetType().GetProperty(s.Split(':')[1]).GetValue(item) + "'";
                             break;
                         case "DateTime":
+                            value = value + "," + s.Split(':')[1] + "='" + item.GetType().GetProperty(s.Split(':')[1]).GetValue(item) + "'";
+                            break;
+                        case "time":
                             value = value + "," + s.Split(':')[1] + "='" + item.GetType().GetProperty(s.Split(':')[1]).GetValue(item) + "'";
                             break;
                         case "varbinarymax":
@@ -481,12 +504,21 @@ namespace handymanworkappapi.Controllers
 
                             break;
                         case "DateTime":
-
                             foreach (PropertyInfo property in properties)
                             {
                                 if (property.Name == s.Split(':')[1])
                                 {
                                     DateTime? BoolValue = ((reader[property.Name]) == DBNull.Value) ? (DateTime?)null : (DateTime)(reader[property.Name]);
+                                    item.GetType().GetProperty(property.Name).SetValue(item, BoolValue);
+                                }
+                            }
+                            break;
+                        case "time":
+                            foreach (PropertyInfo property in properties)
+                            {
+                                if (property.Name == s.Split(':')[1])
+                                {
+                                    TimeSpan? BoolValue = ((reader[property.Name]) == DBNull.Value) ? (TimeSpan?)null : (TimeSpan)(reader[property.Name]);
                                     item.GetType().GetProperty(property.Name).SetValue(item, BoolValue);
                                 }
                             }
@@ -2446,7 +2478,7 @@ namespace handymanworkappapi.Controllers
         }
         public static string[] readerFields()
         {
-            string[] f = { "int:Id","int:EmployeeId", "DateTime:StartDate", "DateTime:EndDate", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            string[] f = { "int:Id", "int:EmployeeId", "DateTime:StartDate", "DateTime:EndDate", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
             return f;
         }
         public static string[] lookupFields()
@@ -2504,32 +2536,61 @@ namespace handymanworkappapi.Controllers
     {
         public int Id { get; set; }
         public int EmployeeScheduleId { get; set; }
-        public DateTime? MondayIn { get; set; }
-        public DateTime? MondayOut { get; set; }
-        public DateTime? TuesdayIn { get; set; }
-        public DateTime? TuesdayOut { get; set; }
-        public DateTime? WednesdayIn { get; set; }
-        public DateTime? WednesdayOut { get; set; }
-        public DateTime? ThursdayIn { get; set; }
-        public DateTime? ThursdayOut { get; set; }
-        public DateTime? FridayIn { get; set; }
-        public DateTime? FridayOut { get; set; }
-        public DateTime? SaturdayIn { get; set; }
-        public DateTime? SaturdayOut { get; set; }
-        public DateTime? SundayIn { get; set; }
-        public DateTime? SundayOut { get; set; }
+        public TimeSpan? MondayIn1 { get; set; }
+        public TimeSpan? MondayOut1 { get; set; }
+        public TimeSpan? MondayIn2 { get; set; }
+        public TimeSpan? MondayOut2 { get; set; }
+        public TimeSpan? TuesdayIn1 { get; set; }
+        public TimeSpan? TuesdayOut1 { get; set; }
+        public TimeSpan? TuesdayIn2 { get; set; }
+        public TimeSpan? TuesdayOut2 { get; set; }
+        public TimeSpan? WednesdayIn1 { get; set; }
+        public TimeSpan? WednesdayOut1 { get; set; }
+        public TimeSpan? WednesdayIn2 { get; set; }
+        public TimeSpan? WednesdayOut2 { get; set; }
+        public TimeSpan? ThursdayIn1 { get; set; }
+        public TimeSpan? ThursdayOut1 { get; set; }
+        public TimeSpan? ThursdayIn2 { get; set; }
+        public TimeSpan? ThursdayOut2 { get; set; }
+        public TimeSpan? FridayIn1 { get; set; }
+        public TimeSpan? FridayOut1 { get; set; }
+        public TimeSpan? FridayIn2 { get; set; }
+        public TimeSpan? FridayOut2 { get; set; }
+        public TimeSpan? SaturdayIn1 { get; set; }
+        public TimeSpan? SaturdayOut1 { get; set; }
+        public TimeSpan? SaturdayIn2 { get; set; }
+        public TimeSpan? SaturdayOut2 { get; set; }
+        public TimeSpan? SundayIn1 { get; set; }
+        public TimeSpan? SundayOut1 { get; set; }
+        public TimeSpan? SundayIn2 { get; set; }
+        public TimeSpan? SundayOut2 { get; set; }
         public DateTime CreatedOnUtc { get; set; }
         public DateTime UpdatedOnUtc { get; set; }
         public string errorMessage { get; set; }
         public bool errorStatus { get; set; }
         public static string[] fields()
         {
-            string[] f = { "int:EmployeeScheduleId", "DateTime:MondayIn", "DateTime:MondayOut", "DateTime:TuesdayIn", "DateTime:TuesdayOut", "DateTime:WednesdayIn", "DateTime:WednesdayOut", "DateTime:ThursdayIn", "DateTime:ThursdayOut", "DateTime:FridayIn", "DateTime:FridayOut", "DateTime:SaturdayIn", "DateTime:SaturdayOut", "DateTime:SundayIn", "DateTime:SundayOut" };
+            string[] f = { "int:EmployeeScheduleId",
+                "time:MondayIn1", "time:MondayOut1", "time:MondayIn2", "time:MondayOut2",
+                "time:TuesdayIn1", "time:TuesdayOut1", "time:TuesdayIn2", "time:TuesdayOut2",
+                "time:WednesdayIn1", "time:WednesdayOut1", "time:WednesdayIn2", "time:WednesdayOut2",
+                "time:ThursdayIn1", "time:ThursdayOut1", "time:ThursdayIn2", "time:ThursdayOut2",
+                "time:FridayIn1", "time:FridayOut1", "time:FridayIn2", "time:FridayOut2",
+                "time:SaturdayIn1", "time:SaturdayOut1", "time:SaturdayIn2", "time:SaturdayOut2",
+                "time:SundayIn1", "time:SundayOut1", "time:SundayIn2", "time:SundayOut2" };
             return f;
         }
         public static string[] readerFields()
         {
-            string[] f = { "int:Id","int:EmployeeScheduleId", "DateTime:MondayIn", "DateTime:MondayOut", "DateTime:TuesdayIn", "DateTime:TuesdayOut", "DateTime:WednesdayIn", "DateTime:WednesdayOut", "DateTime:ThursdayIn", "DateTime:ThursdayOut", "DateTime:FridayIn", "DateTime:FridayOut", "DateTime:SaturdayIn", "DateTime:SaturdayOut", "DateTime:SundayIn", "DateTime:SundayOut", "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
+            string[] f = { "int:Id", "int:EmployeeScheduleId",
+                "time:MondayIn1", "time:MondayOut1", "time:MondayIn2", "time:MondayOut2",
+                "time:TuesdayIn1", "time:TuesdayOut1", "time:TuesdayIn2", "time:TuesdayOut2",
+                "time:WednesdayIn1", "time:WednesdayOut1", "time:WednesdayIn2", "time:WednesdayOut2",
+                "time:ThursdayIn1", "time:ThursdayOut1", "time:ThursdayIn2", "time:ThursdayOut2",
+                "time:FridayIn1", "time:FridayOut1", "time:FridayIn2", "time:FridayOut2",
+                "time:SaturdayIn1", "time:SaturdayOut1", "time:SaturdayIn2", "time:SaturdayOut2",
+                "time:SundayIn1", "time:SundayOut1", "time:SundayIn2", "time:SundayOut2",
+                "DateTime:CreatedOnUtc", "DateTime:UpdatedOnUtc", };
             return f;
         }
         public static string[] lookupFields()
@@ -2539,7 +2600,7 @@ namespace handymanworkappapi.Controllers
         }
         public static string columns()
         {
-            return "Id,EmployeeScheduleId,MondayIn,MondayOut,TuesdayIn,TuesdayOut,WednesdayIn,WednesdayOut,ThursdayIn,ThursdayOut,FridayIn,FridayOut,SaturdayIn,SaturdayOut,SundayIn,SundayOut,CreatedOnUtc,UpdatedOnUtc";
+            return "Id,EmployeeScheduleId,MondayIn1,MondayOut1,MondayIn2,MondayOut2,TuesdayIn1,TuesdayOut1,TuesdayIn2,TuesdayOut2,WednesdayIn1,WednesdayOut1,WednesdayIn2,WednesdayOut2,ThursdayIn1,ThursdayOut1,ThursdayIn2,ThursdayOut2,FridayIn1,FridayOut1,FridayIn2,FridayOut2,SaturdayIn1,SaturdayOut1,SaturdayIn2,SaturdayOut2,SundayIn1,SundayOut1,SundayIn2,SundayOut2,CreatedOnUtc,UpdatedOnUtc";
         }
     }
     [RoutePrefix("api/employeescheduleweek")]
@@ -2580,6 +2641,80 @@ namespace handymanworkappapi.Controllers
         public ResultResponse Delete(int id)
         {
             return (new Crud()).Delete(new EmployeeScheduleWeek(), id);
+        }
+    }
+
+    public class Email
+    {
+        public string Name { get; set; }
+        public string EmailAddress { get; set; }
+        public string Phone { get; set; }
+        public string Message { get; set; }
+    }
+    [RoutePrefix("api/sendemail")]
+    public class SendEmailController : ApiController
+    {
+        [HttpPost]
+        [Route("send")]
+        [AllowAnonymous]
+        public ResultResponse Send([FromBody]Email item)
+        {
+            ResultResponse result = new ResultResponse();
+            try
+            {
+                //var apiKey = Environment.GetEnvironmentVariable("SendGridKey");
+                //var client = new SendGridClient(apiKey);
+                //var from = new EmailAddress("sejaldhaval@gmail.com", "User");
+                //var subject = "Dhyanu Contact us";
+                //var to = new EmailAddress(item.EmailAddress, "User");
+                //var plainTextContent = item.Message;
+                //var htmlContent = "<strong>" + item.Message + "</strong>";
+                //var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+                //var response = await client.SendEmailAsync(msg);
+
+                MailMessage message = new MailMessage();
+                message.From = new MailAddress("sejaldhaval@gmail.com");
+                message.To.Add(new MailAddress(item.EmailAddress));
+                message.Subject = "Dhyanu Contact us";
+                message.IsBodyHtml = true;
+                message.Body = item.Message;
+                SmtpClient client = new SmtpClient(strMailServer);
+                System.Net.NetworkCredential ncCredentials = new System.Net.NetworkCredential(strMailUserName, strMailPassword);
+                client.Credentials = ncCredentials;
+                client.Port = int.Parse(strMailPort);
+                client.EnableSsl = true;
+                client.DeliveryMethod = SmtpDeliveryMethod.Network;
+                client.Send(message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return result;
+        }
+        public static string strMailServer
+        {
+            get { return ConfigurationManager.AppSettings["SMTPServer"]; }
+        }
+        public static string strMailPassword
+        {
+            get { return ConfigurationManager.AppSettings["SMTPPassword"]; }
+        }
+
+        public static string strMailUserName
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["SMTPUserName"];
+            }
+        }
+        public static string strMailPort
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["SMTPPort"];
+            }
         }
     }
 }
