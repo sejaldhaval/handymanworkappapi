@@ -1049,7 +1049,6 @@ namespace handymanworkappapi.Controllers
                                     obj = dbHelp.LookupLoop(instance, lookupFields);
                                     self.Add(obj);
                                 }
-
                                 if (objectType.Name.ToString() == "MaintenancePriority")
                                 {
                                     object obj = null;
@@ -1098,7 +1097,6 @@ namespace handymanworkappapi.Controllers
                                     obj = dbHelp.LookupLoop(instance, lookupFields);
                                     self.Add(obj);
                                 }
-
                                 if (objectType.Name.ToString() == "PurchaseOrderStatus")
                                 {
                                     object obj = null;
@@ -1107,7 +1105,6 @@ namespace handymanworkappapi.Controllers
                                     obj = dbHelp.LookupLoop(instance, lookupFields);
                                     self.Add(obj);
                                 }
-
                                 if (objectType.Name.ToString() == "Room")
                                 {
                                     object obj = null;
@@ -1141,7 +1138,14 @@ namespace handymanworkappapi.Controllers
                                     self.Add(obj);
                                 }
                             }
-                            result.data = self;
+                            if (self.Count == 0)
+                            {
+                                result.data = null;
+                            }
+                            else
+                            {
+                                result.data = self;
+                            }
                         }
                     }
                 }
