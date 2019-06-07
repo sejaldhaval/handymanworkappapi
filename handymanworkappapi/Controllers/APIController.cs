@@ -24,7 +24,6 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OAuth;
-using SendGrid;
 
 namespace handymanworkappapi.Controllers
 {
@@ -785,7 +784,14 @@ namespace handymanworkappapi.Controllers
                                     self.Add(obj);
                                 }
                             }
-                            result.data = self;
+                            if (self.Count == 0)
+                            {
+                                result.data = null;
+                            }
+                            else
+                            {
+                                result.data = self;
+                            }
                         }
                     }
                 }

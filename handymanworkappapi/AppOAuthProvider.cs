@@ -20,8 +20,9 @@ namespace handymanworkappapi
                 Email = context.UserName,
                 Password = context.Password
             };
-            object isUserValidated = user.ListFiltered("Email='" + emp.Email + "' AND Password='" + emp.Password + "'").data;
-            if (isUserValidated != null)
+            object validateduser = user.ListFiltered("Email='" + emp.Email + "' AND Password='" + emp.Password + "'").data;
+
+            if (validateduser != null)
             {
                 var identity = new ClaimsIdentity(context.Options.AuthenticationType);
                 identity.AddClaim(new Claim("Email", context.UserName));

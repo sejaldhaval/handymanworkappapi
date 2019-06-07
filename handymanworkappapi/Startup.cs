@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Web.Http;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.OAuth;
 using Owin;
@@ -27,3 +26,4 @@ namespace handymanworkappapi
         }
     }
 }
+
